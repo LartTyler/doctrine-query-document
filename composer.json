@@ -1,0 +1,22 @@
+{
+	"name": "dbstudios/doctrine-query-document",
+	"description": "Allows building Doctrine queries using MongoDB-style query documents",
+	"license": "GPL-3.0-or-later",
+	"type": "library",
+	"authors": [
+		{
+			"name": "Tyler Lartonoix",
+			"email": "tyler@lartonoix.com",
+			"homepage": "https://github.com/LartTyler"
+		}
+	],
+	"require": {
+		"php": "^7.2",
+		"doctrine/orm": "^2.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"DaybreakStudios\\DoctrineQueryDocument\\": "src/"
+		}
+	}
+}
