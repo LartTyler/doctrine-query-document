@@ -128,7 +128,7 @@
 				}
 			}
 
-			if (--$this->processDepth)
+			if (--$this->processDepth === 0)
 				$this->applied = true;
 		}
 	}
