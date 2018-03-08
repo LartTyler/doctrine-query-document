@@ -209,6 +209,24 @@
 		}
 
 		/**
+		 * @param Composite|null   $node
+		 * @param string           $x
+		 * @param int|float|string $min
+		 * @param int|float|string $max
+		 *
+		 * @return void
+		 */
+		public function between(?Composite $node, string $x, $min, $max): void {
+			$minParam = '?' . $this->paramIndex;
+			$this->addParameter($min);
+
+			$maxParam = '?' . $this->paramIndex;
+			$this->addParameter($max);
+
+			$node->add(sprintf('%s BETWEEN %s AND %s', $this->resolver->resolve($x), $minParam, $maxParam));
+		}
+
+		/**
 		 * @param Composite|null $node
 		 * @param string         $x
 		 * @param string         $infix
