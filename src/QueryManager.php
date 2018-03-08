@@ -18,6 +18,7 @@
 			Operators\NotInOperator::class,
 			Operators\NotLikeOperator::class,
 			Operators\OrOperator::class,
+			Operators\AndOperator::class,
 		];
 
 		/**
