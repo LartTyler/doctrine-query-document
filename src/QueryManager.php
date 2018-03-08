@@ -42,7 +42,7 @@
 				$this->setOperators($operators);
 			else {
 				foreach (self::BUILTIN_OPERATORS as $class)
-					$this->setOperators(new $class());
+					$this->setOperator(new $class());
 			}
 		}
 
