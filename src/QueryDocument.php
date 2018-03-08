@@ -1,6 +1,7 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
+	use DaybreakStudios\DoctrineQueryDocument\Exception\DocumentAlreadyAppliedException;
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownOperatorException;
 	use Doctrine\Common\Persistence\ObjectManager;
 	use Doctrine\ORM\Query\Expr\Andx;
@@ -94,8 +95,8 @@
 		 * {@inheritdoc}
 		 */
 		public function process(array $query, Composite $parent = null): void {
-			if ($this->applied)
-				return;
+			if ($this->isApplied())
+				throw new DocumentAlreadyAppliedException();
 
 			++$this->processDepth;
 

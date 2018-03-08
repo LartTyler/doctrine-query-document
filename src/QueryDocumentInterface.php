@@ -26,4 +26,9 @@
 		 * @return Expr
 		 */
 		public function expr(): Expr;
+
+		/**
+		 * @return bool
+		 */
+		public function isApplied(): bool;
 	}
