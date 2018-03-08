@@ -104,7 +104,7 @@
 		/**
 		 * {@inheritdoc}
 		 */
-		public function create(QueryBuilder $qb, array $query): QueryDocumentInterface {
+		public function create(QueryBuilder $qb): QueryDocumentInterface {
 			return new QueryDocument($this, $this->objectManager, $qb);
 		}
 

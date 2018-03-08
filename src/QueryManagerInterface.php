@@ -39,11 +39,10 @@
 
 		/**
 		 * @param QueryBuilder $qb
-		 * @param array        $query
 		 *
 		 * @return QueryDocumentInterface
 		 */
-		public function create(QueryBuilder $qb, array $query): QueryDocumentInterface;
+		public function create(QueryBuilder $qb): QueryDocumentInterface;
 
 		/**
 		 * @param QueryBuilder $qb
