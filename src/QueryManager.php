@@ -13,6 +13,7 @@
 			Operators\LessThanEqualOperator::class,
 			Operators\LessThanOperator::class,
 			Operators\LikeOperator::class,
+			Operators\EqualOperator::class,
 			Operators\NotEqualOperator::class,
 			Operators\NotInOperator::class,
 			Operators\NotLikeOperator::class,
