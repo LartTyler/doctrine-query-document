@@ -41,7 +41,19 @@
 			$this->resolver = $resolver;
 			$this->rootComposite = $rootComposite ?? new Andx();
 
-			$this->qb->andWhere($this->rootComposite);
+			$where = $this->qb->getDQLPart('where');
+
+			if ($where instanceof Composite)
+				$where->add($this->rootComposite);
+			else {
+				if ($where !== null)
+					$this->rootComposite = new Andx([
+						$where,
+						$this->rootComposite,
+					]);
+
+				$qb->where($this->rootComposite);
+			}
 		}
 
 		/**
