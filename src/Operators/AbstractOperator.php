@@ -33,7 +33,7 @@
 		public function process(
 			QueryDocumentInterface $document,
 			string $field,
-			string $value,
+			$value,
 			Composite $parent
 		): void {
 			$this->validate($field, $value);
