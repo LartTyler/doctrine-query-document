@@ -94,6 +94,13 @@
 		/**
 		 * {@inheritdoc}
 		 */
+		public function isApplied(): bool {
+			return $this->applied;
+		}
+
+		/**
+		 * {@inheritdoc}
+		 */
 		public function process(array $query, Composite $parent = null): void {
 			if ($this->isApplied())
 				throw new DocumentAlreadyAppliedException();
