@@ -34,13 +34,15 @@
 		 *
 		 * @param ObjectManager $objectManager
 		 * @param array         $operators
+		 * @param bool          $useBuiltin
 		 */
-		public function __construct(ObjectManager $objectManager, array $operators = []) {
+		public function __construct(ObjectManager $objectManager, array $operators = [], bool $useBuiltin = true) {
 			$this->objectManager = $objectManager;
 
 			if ($operators)
 				$this->setOperators($operators);
-			else {
+
+			if ($useBuiltin) {
 				foreach (self::BUILTIN_OPERATORS as $class)
 					$this->setOperator(new $class());
 			}
