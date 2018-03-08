@@ -7,7 +7,12 @@
 		/**
 		 * @return QueryManagerInterface
 		 */
-		public function getManager(): QueryManagerInterface;
+		public function getQueryManager(): QueryManagerInterface;
+
+		/**
+		 * @return ResolverInterface
+		 */
+		public function getResolver(): ResolverInterface;
 
 		/**
 		 * @param array          $query

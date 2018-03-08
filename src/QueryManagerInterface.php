@@ -5,11 +5,45 @@
 
 	interface QueryManagerInterface {
 		/**
-		 * @param array $query
+		 * @return OperatorInterface[]
+		 */
+		public function getOperators(): array;
+
+		/**
+		 * @param string $key
+		 *
+		 * @return OperatorInterface|null
+		 */
+		public function getOperator(string $key): ?OperatorInterface;
+
+		/**
+		 * @param OperatorInterface[] $operators
+		 *
+		 * @return $this
+		 */
+		public function setOperators(array $operators);
+
+		/**
+		 * @param OperatorInterface $operator
+		 *
+		 * @return $this
+		 */
+		public function setOperator(OperatorInterface $operator);
+
+		/**
+		 * @param string $key
+		 *
+		 * @return $this
+		 */
+		public function removeOperator(string $key);
+
+		/**
+		 * @param QueryBuilder $qb
+		 * @param array        $query
 		 *
 		 * @return QueryDocumentInterface
 		 */
-		public function create(array $query): QueryDocumentInterface;
+		public function create(QueryBuilder $qb, array $query): QueryDocumentInterface;
 
 		/**
 		 * @param QueryBuilder $qb
