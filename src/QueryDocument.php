@@ -119,18 +119,17 @@
 					$operator->process($this, $key, $value, $parent);
 				} else {
 					if (is_array($value)) {
-						$itemKey = array_keys($value)[0];
+						foreach ($value as $itemKey => $item) {
+							if (strpos($itemKey, '$') !== 0)
+								throw new \InvalidArgumentException('Invalid key in filter document for ' . $key);
 
-						if (strpos($itemKey, '$') !== 0)
-							throw new \InvalidArgumentException('You may only pass arrays as search values for ' .
-								'operators');
+							$operator = $this->getQueryManager()->getOperator($itemKey);
 
-						$operator = $this->getQueryManager()->getOperator($itemKey);
+							if (!$operator)
+								throw new UnknownOperatorException($key);
 
-						if (!$operator)
-							throw new UnknownOperatorException($key);
-
-						$operator->process($this, $key, array_values($value)[0], $parent);
+							$operator->process($this, $key, $item, $parent);
+						}
 					} else
 						$this->expr()->eq($parent, $key, $value);
 				}
