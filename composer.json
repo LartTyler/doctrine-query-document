@@ -14,6 +14,9 @@
 		"php": "^7.1",
 		"doctrine/orm": "^2.6"
 	},
+	"suggest": {
+		"syslogic/doctrine-json-functions": "If you want to use the JSON type for fields"
+	},
 	"autoload": {
 		"psr-4": {
 			"DaybreakStudios\\DoctrineQueryDocument\\": "src/"
