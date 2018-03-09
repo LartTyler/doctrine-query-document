@@ -93,14 +93,18 @@ operators.
 
 |Operator|Accepted Argument(s)|Documentation|
 |:---|:---|:---|
+|`$and`|Array&lt;Query&gt;|[Link](https://docs.mongodb.com/manual/reference/operator/query/and/#op._S_and)|
 |`$or`|Array&lt;Query&gt;|[Link](https://docs.mongodb.com/manual/reference/operator/query/or/#op._S_or)|
 |`$gt`|Number|[Link](https://docs.mongodb.com/manual/reference/operator/query/gt/#op._S_gt)|
 |`$gte`|Number|[Link](https://docs.mongodb.com/manual/reference/operator/query/gte/#op._S_gte)|
 |`$lt`|Number|[Link](https://docs.mongodb.com/manual/reference/operator/query/lt/#op._S_lt)|
 |`$lte`|Number|[Link](https://docs.mongodb.com/manual/reference/operator/query/lte/#op._S_lte)|
+|`$eq`|Any|[Link](https://docs.mongodb.com/manual/reference/operator/query/eq/#op._S_eq)|
 |`$neq`|Any|[Link](https://docs.mongodb.com/manual/reference/operator/query/ne/#op._S_ne)|
 |`$in`|Array&lt;Any&gt;|[Link](https://docs.mongodb.com/manual/reference/operator/query/in/#op._S_in)|
 |`$nin`|Array&lt;Any&gt;|[Link](https://docs.mongodb.com/manual/reference/operator/query/nin/#op._S_nin)|
+|`$like`|String|A MySQL style LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
+|`$nlike`|String|A negated MySQL LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
 
 You may choose to skip registering built-in operators when creating your query manager by passing `false` as the third
 argument in the constructor.
