@@ -126,7 +126,7 @@
 							$operator = $this->getQueryManager()->getOperator($itemKey);
 
 							if (!$operator)
-								throw new UnknownOperatorException($key);
+								throw new UnknownOperatorException($itemKey);
 
 							$operator->process($this, $key, $item, $parent);
 						}
