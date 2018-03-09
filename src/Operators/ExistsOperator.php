@@ -32,6 +32,9 @@
 			$value,
 			Composite $parent
 		): void {
-			$document->expr()->neq($parent, $field, null);
+			if ($value)
+				$document->expr()->neq($parent, $field, null);
+			else
+				$document->expr()->eq($parent, $field, null);
 		}
 	}
