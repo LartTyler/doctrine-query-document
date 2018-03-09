@@ -33,6 +33,57 @@ builder.
 Any values passed in the second argumemnt to `apply()` will automatically be transformed to positional parameters and
 will be set as a parameter on the query builder.
 
+## Traversing Relationships
+Fields on related entities may be queried using dot notation, in the form `relationshipField.field`. Imagine that your `MyEntity` class is related to `OtherEntity` through the field `otherEntity`.
+
+```php
+<?php
+    // $objectManager should be an instance of Doctrine\Common\Persistence\ObjectManager
+
+    $manager = new QueryManager($objectManager);
+    $queryBuilder = $objectManager->createQueryBuilder()
+        ->from('App\Entity\MyEntity', 'e')
+        ->select('e');
+
+    $manager->apply($queryBuilder, [
+        'otherEntity.field' => 'value',
+    ]);
+
+    echo $queryBuilder->getDQL();
+
+    // SELECT e FROM App\Entity\MyEntity e JOIN e.otherEntity join_1 WHERE join_1.field = ?0
+```
+
+## Traversing JSON Objects
+MySQL 5.7 added support for the JSON type. For any fields whose type is `JSON`, dot-notated fields will automatically be
+extracted. Imagine that your `MyEntity` class has a JSON field named `attributes`, which looks like this.
+
+```json
+{
+    "myField": "value"
+}
+```
+
+You could query for it like so.
+
+```php
+<?php
+    // $objectManager should be an instance of Doctrine\Common\Persistence\ObjectManager
+
+    $manager = new QueryManager($objectManager);
+    $queryBuilder = $objectManager->createQueryBuilder()
+        ->from('App\Entity\MyEntity', 'e')
+        ->select('e');
+
+    $manager->apply($queryBuilder, [
+        'attributes.myField' => 'value',
+    ]);
+
+    echo $queryBuilder->getDQL();
+
+    // SELECT e FROM App\Entity\MyEntity e WHERE JSON_UNQUOTE(JSON_EXTRACT(attributes, '$.myField')) = ?0
+```
+
 # Custom Operators
 You can add custom operator classes by implementing `DaybreakStudios\DoctrineQueryDocument\OperatorInterface`, or by
 extending `DaybreakStudios\DoctrineQueryDocument\Operators\AbstractOperator`.
