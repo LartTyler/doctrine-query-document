@@ -105,6 +105,7 @@ operators.
 |`$nin`|Array&lt;Any&gt;|[Link](https://docs.mongodb.com/manual/reference/operator/query/nin/#op._S_nin)|
 |`$like`|String|A MySQL style LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
 |`$nlike`|String|A negated MySQL LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
+|`$exists`|Boolean|[Link](https://docs.mongodb.com/manual/reference/operator/query/exists/#op._S_exists)|
 
 You may choose to skip registering built-in operators when creating your query manager by passing `false` as the third
 argument in the constructor.

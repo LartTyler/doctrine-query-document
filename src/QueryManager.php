@@ -19,6 +19,7 @@
 			Operators\NotLikeOperator::class,
 			Operators\OrOperator::class,
 			Operators\AndOperator::class,
+			Operators\ExistsOperator::class,
 		];
 
 		/**
