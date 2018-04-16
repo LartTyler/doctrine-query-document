@@ -21,5 +21,7 @@
 		"psr-4": {
 			"DaybreakStudios\\DoctrineQueryDocument\\": "src/"
 		}
+	},
+	"require-dev": {
 	}
 }
