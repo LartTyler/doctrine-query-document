@@ -1,7 +1,6 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
-	use DaybreakStudios\DoctrineQueryDocument\Exception\CannotDirectlySearchRelationshipException;
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownFieldException;
 	use Doctrine\Common\Persistence\ObjectManager;
 	use Doctrine\DBAL\Types\Type;
@@ -9,6 +8,8 @@
 	use Doctrine\ORM\QueryBuilder;
 
 	class Resolver implements ResolverInterface {
+		use MappedFieldsTrait;
+
 		/**
 		 * @var ObjectManager
 		 */
@@ -44,13 +45,17 @@
 		 *
 		 * @param ObjectManager $manager
 		 * @param QueryBuilder  $qb
+		 * @param string[][]    $mappedFields
 		 */
-		public function __construct(ObjectManager $manager, QueryBuilder $qb) {
+		public function __construct(ObjectManager $manager, QueryBuilder $qb, array $mappedFields = []) {
 			$this->manager = $manager;
 			$this->qb = $qb;
 
 			$this->rootMetadata = $manager->getClassMetadata($qb->getRootEntities()[0]);
 			$this->rootAlias = $qb->getRootAliases()[0];
+
+			foreach ($mappedFields as $class => $fields)
+				$this->setMappedFields($class, $fields);
 		}
 
 		/**
@@ -60,42 +65,57 @@
 			if (isset($this->resolveCache[$field]))
 				return $this->resolveCache[$field];
 
-			$parts = explode('.', $field);
-			$actualField = array_pop($parts);
-
-			if (!sizeof($parts)) {
-				if ($this->rootMetadata->hasAssociation($actualField))
-					throw new CannotDirectlySearchRelationshipException($actualField);
-
-				return $this->rootAlias . '.' . $actualField;
-			}
+			$next = $node = LinkedList::fromArray(explode('.', $field));
 
 			$metadata = $this->rootMetadata;
 			$alias = $this->rootAlias;
 
-			foreach ($parts as $i => $part) {
-				if ($metadata->getTypeOfField($part) === Type::JSON) {
-					if (isset($parts[$i + 1]))
-						$items = array_slice($parts, $i + 1);
-					else
-						$items = [];
+			do {
+				$node = $next;
+				$part = $node->getValue();
 
-					$items[] = $actualField;
+				if ($mapped = $this->getMappedField($metadata->getName(), $part)) {
+					$next = $node->getNext();
+
+					$mappedParts = explode('.', $mapped);
+					$node = $tail = new LinkedList(array_shift($mappedParts));
+
+					foreach ($mappedParts as $mappedPart)
+						$tail->setNext($tail = new LinkedList($mappedPart));
+
+					$tail->setNext($next);
+					$part = $node->getValue();
+				}
+
+				if ($metadata->getTypeOfField($part) === Type::JSON) {
+					$items = [];
+
+					if ($next = $node->getNext()) {
+						do {
+							$items[] = $next->getValue();
+						} while ($next = $next->getNext());
+					}
 
 					$jsonKey = implode('.', $items);
 
 					return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
-				} else if (!$metadata->hasAssociation($part))
+				} else if ($metadata->hasField($part))
+					break;
+				else if (!$metadata->hasAssociation($part))
 					throw new UnknownFieldException($field);
 
 				$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
 				$alias = $this->getJoinAlias($alias, $part);
-			}
+			} while ($next = $node->getNext());
+
+			$actualField = $node->getValue();
 
 			if (!$metadata->hasField($actualField))
 				throw new UnknownFieldException($field);
 
-			return $alias . '.' . $actualField;
+			$resolved = $alias . '.' . $actualField;
+
+			return $this->resolveCache[$field] = $resolved;
 		}
 
 		/**

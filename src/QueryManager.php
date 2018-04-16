@@ -6,6 +6,8 @@
 	use Doctrine\ORM\QueryBuilder;
 
 	class QueryManager implements QueryManagerInterface {
+		use MappedFieldsTrait;
+
 		private const BUILTIN_OPERATORS = [
 			Operators\GreaterThanEqualOperator::class,
 			Operators\GreaterThanOperator::class,
@@ -108,7 +110,10 @@
 		 * {@inheritdoc}
 		 */
 		public function create(QueryBuilder $qb): QueryDocumentInterface {
-			return new QueryDocument($this, $this->objectManager, $qb);
+			$document = new QueryDocument($this, $this->objectManager, $qb);
+			$document->getResolver()->setAllMappedFields($this->mappedFields);
+
+			return $document;
 		}
 
 		/**
@@ -116,6 +121,6 @@
 		 * @param array        $query
 		 */
 		public function apply(QueryBuilder $qb, array $query): void {
-			$this->create($qb, $query)->process($query);
+			$this->create($qb)->process($query);
 		}
 	}
