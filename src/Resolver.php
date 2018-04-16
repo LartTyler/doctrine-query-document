@@ -63,18 +63,14 @@
 		}
 
 		/**
-		 * @param string $class
-		 * @param string $field
-		 *
-		 * @return null|string
+		 * {@inheritdoc}
 		 */
 		public function getMappedField(string $class, string $field): ?string {
 			return $this->mappedFields[$class][$field] ?? null;
 		}
 
 		/**
-		 * @param string   $class
-		 * @param string[] $mappedFields
+		 * {@inheritdoc}
 		 */
 		public function setMappedFields(string $class, array $mappedFields) {
 			$this->mappedFields[$class] = [];
@@ -84,11 +80,7 @@
 		}
 
 		/**
-		 * @param string $class
-		 * @param string $field
-		 * @param string $target
-		 *
-		 * @return $this
+		 * {@inheritdoc}
 		 */
 		public function setMappedField(string $class, string $field, string $target) {
 			if (!isset($this->mappedFields[$class]))
@@ -100,10 +92,7 @@
 		}
 
 		/**
-		 * @param string $class
-		 * @param string $field
-		 *
-		 * @return $this
+		 * {@inheritdoc}
 		 */
 		public function removeMappedField(string $class, string $field) {
 			if (!isset($this->mappedFields[$class]))
