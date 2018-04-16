@@ -11,6 +11,13 @@
 		public function getMappedField(string $class, string $field): ?string;
 
 		/**
+		 * @param string[][] $mappedFields
+		 *
+		 * @return $this
+		 */
+		public function setAllMappedFields(array $mappedFields);
+
+		/**
 		 * @param string   $class
 		 * @param string[] $mappedFields
 		 *

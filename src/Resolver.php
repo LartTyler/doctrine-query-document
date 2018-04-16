@@ -1,7 +1,6 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
-	use DaybreakStudios\DoctrineQueryDocument\Exception\CannotDirectlySearchRelationshipException;
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownFieldException;
 	use Doctrine\Common\Persistence\ObjectManager;
 	use Doctrine\DBAL\Types\Type;
@@ -9,6 +8,8 @@
 	use Doctrine\ORM\QueryBuilder;
 
 	class Resolver implements ResolverInterface {
+		use MappedFieldsTrait;
+
 		/**
 		 * @var ObjectManager
 		 */
@@ -40,11 +41,6 @@
 		protected $resolveCache = [];
 
 		/**
-		 * @var string[][]
-		 */
-		protected $mappedFields = [];
-
-		/**
 		 * Resolver constructor.
 		 *
 		 * @param ObjectManager $manager
@@ -60,47 +56,6 @@
 
 			foreach ($mappedFields as $class => $fields)
 				$this->setMappedFields($class, $fields);
-		}
-
-		/**
-		 * {@inheritdoc}
-		 */
-		public function getMappedField(string $class, string $field): ?string {
-			return $this->mappedFields[$class][$field] ?? null;
-		}
-
-		/**
-		 * {@inheritdoc}
-		 */
-		public function setMappedFields(string $class, array $mappedFields) {
-			$this->mappedFields[$class] = [];
-
-			foreach ($mappedFields as $field => $mappedField)
-				$this->setMappedField($class, $field, $mappedField);
-		}
-
-		/**
-		 * {@inheritdoc}
-		 */
-		public function setMappedField(string $class, string $field, string $target) {
-			if (!isset($this->mappedFields[$class]))
-				$this->mappedFields[$class] = [];
-
-			$this->mappedFields[$class][$field] = $target;
-
-			return $this;
-		}
-
-		/**
-		 * {@inheritdoc}
-		 */
-		public function removeMappedField(string $class, string $field) {
-			if (!isset($this->mappedFields[$class]))
-				return $this;
-
-			unset($this->mappedFields[$class][$field]);
-
-			return $this;
 		}
 
 		/**
