@@ -84,6 +84,36 @@ You could query for it like so.
     // SELECT e FROM App\Entity\MyEntity e WHERE JSON_UNQUOTE(JSON_EXTRACT(attributes, '$.myField')) = ?0
 ```
 
+# Field Mapping
+In some cases, it may make sense to map shortened field names to fields on related entities. For example, assume the
+`otherEntity` field is a relation that contains a `name` field.
+
+```php
+<?php
+    // $objectManager should be an instance of Doctrine\Common\Persistence\ObjectManager
+
+    $manager = new QueryManager($objectManager);
+    $queryBuilder = $objectManager->createQueryBuilder()
+        ->from('App\Entity\MyEntity', 'e')
+        ->select('e');
+
+    $manager->apply($queryBuilder, [
+        'otherEntityName' => 'value',
+    ]);
+```
+
+Normally, the above example would fail, because `MyEntity` does not have a `otherEntityName` field. However, we can
+alias the field like so.
+
+```php
+<?php
+    $manager->setMappedField('App\\Entity\\MyEntity', 'otherEntityName', 'otherEntity.name');
+
+    $manager->apply($queryBuilder, [
+        'otherEntityName' => 'value',
+    ]);
+```
+
 # Custom Operators
 You can add custom operator classes by implementing `DaybreakStudios\DoctrineQueryDocument\OperatorInterface`, or by
 extending `DaybreakStudios\DoctrineQueryDocument\Operators\AbstractOperator`.
