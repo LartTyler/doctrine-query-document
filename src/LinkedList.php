@@ -55,10 +55,10 @@
 			if (!$items)
 				throw new \InvalidArgumentException('Cannot create list from an empty array');
 
-			$head = $node = new static(array_shift($items));
+			$head = $tail = new static(array_shift($items));
 
 			foreach ($items as $item)
-				$node->setNext($next = new static($item));
+				$tail->setNext($tail = new static($item));
 
 			return $head;
 		}
