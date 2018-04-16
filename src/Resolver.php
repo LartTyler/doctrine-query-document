@@ -89,6 +89,17 @@
 			do {
 				$part = $node->getValue();
 
+				if ($mapped = $this->getMappedField($metadata->getName(), $part)) {
+					$mappedParts = explode('.', $mapped);
+					$mappedNode = new LinkedList(array_shift($mappedParts));
+
+					foreach ($mappedParts as $mappedPart)
+						$mappedNode->setNext($mappedNode = new LinkedList($mappedPart));
+
+					$mappedNode->setNext($node->getNext());
+					$node->setNext($mappedNode);
+				}
+
 				if ($metadata->getTypeOfField($part) === Type::JSON) {
 					$items = [];
 
