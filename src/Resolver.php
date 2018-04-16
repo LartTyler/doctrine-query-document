@@ -155,25 +155,6 @@
 				$alias = $this->getJoinAlias($alias, $part);
 			} while ($node = $node->getNext());
 
-			// foreach ($parts as $i => $part) {
-			// 	if ($metadata->getTypeOfField($part) === Type::JSON) {
-			// 		if (isset($parts[$i + 1]))
-			// 			$items = array_slice($parts, $i + 1);
-			// 		else
-			// 			$items = [];
-			//
-			// 		$items[] = $actualField;
-			//
-			// 		$jsonKey = implode('.', $items);
-			//
-			// 		return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
-			// 	} else if (!$metadata->hasAssociation($part))
-			// 		throw new UnknownFieldException($field);
-			//
-			// 	$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
-			// 	$alias = $this->getJoinAlias($alias, $part);
-			// }
-
 			if (!$metadata->hasField($actualField))
 				throw new UnknownFieldException($field);
 
