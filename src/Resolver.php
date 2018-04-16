@@ -40,17 +40,78 @@
 		protected $resolveCache = [];
 
 		/**
+		 * @var string[][]
+		 */
+		protected $mappedFields = [];
+
+		/**
 		 * Resolver constructor.
 		 *
 		 * @param ObjectManager $manager
 		 * @param QueryBuilder  $qb
+		 * @param string[][]    $mappedFields
 		 */
-		public function __construct(ObjectManager $manager, QueryBuilder $qb) {
+		public function __construct(ObjectManager $manager, QueryBuilder $qb, array $mappedFields = []) {
 			$this->manager = $manager;
 			$this->qb = $qb;
 
 			$this->rootMetadata = $manager->getClassMetadata($qb->getRootEntities()[0]);
 			$this->rootAlias = $qb->getRootAliases()[0];
+
+			foreach ($mappedFields as $class => $fields)
+				$this->setMappedFields($class, $fields);
+		}
+
+		/**
+		 * @param string $class
+		 * @param string $field
+		 *
+		 * @return null|string
+		 */
+		public function getMappedField(string $class, string $field): ?string {
+			return $this->mappedFields[$class][$field] ?? null;
+		}
+
+		/**
+		 * @param string   $class
+		 * @param string[] $mappedFields
+		 */
+		public function setMappedFields(string $class, array $mappedFields) {
+			$this->mappedFields[$class] = [];
+
+			foreach ($mappedFields as $field => $mappedField)
+				$this->setMappedField($class, $field, $mappedField);
+		}
+
+		/**
+		 * @param string $class
+		 * @param string $field
+		 * @param string $target
+		 *
+		 * @return $this
+		 */
+		public function setMappedField(string $class, string $field, string $target) {
+			if (!isset($this->mappedFields[$class]))
+				$this->mappedFields[$class] = [];
+
+			$this->mappedFields[$class][$field] = $target;
+
+			return $this;
+		}
+
+		/**
+		 * @param string $class
+		 * @param string $field
+		 *
+		 * @return $this
+		 */
+		public function removeMappedField(string $class, string $field) {
+			if (!isset($this->mappedFields[$class]))
+				return $this;
+
+			unset($this->mappedFields[$class][$field]);
+
+			return $this;
 		}
 
 		/**
@@ -64,21 +125,34 @@
 			$actualField = array_pop($parts);
 
 			if (!sizeof($parts)) {
-				if ($this->rootMetadata->hasAssociation($actualField))
-					throw new CannotDirectlySearchRelationshipException($actualField);
+				// If $actualField isn't an association, it's a concrete field, so we can short circuit and return
+				// early
+				if (!$this->rootMetadata->hasAssociation($actualField))
+					return $this->rootAlias . '.' . $actualField;
 
-				return $this->rootAlias . '.' . $actualField;
+				// Otherwise, it IS an association, but since Doctrine doesn't let us query associations by their
+				// ID directly, we set $parts to the field itself, and $actualField to "id" so we can query against
+				// that.
+				$parts = [$actualField];
+				$actualField = 'id';
 			}
+
+			$node = LinkedList::fromArray($parts);
 
 			$metadata = $this->rootMetadata;
 			$alias = $this->rootAlias;
 
-			foreach ($parts as $i => $part) {
+			do {
+				$part = $node->getValue();
+
 				if ($metadata->getTypeOfField($part) === Type::JSON) {
-					if (isset($parts[$i + 1]))
-						$items = array_slice($parts, $i + 1);
-					else
-						$items = [];
+					$items = [];
+
+					if ($next = $node->getNext()) {
+						do {
+							$items[] = $next->getValue();
+						} while ($next = $next->getNext());
+					}
 
 					$items[] = $actualField;
 
@@ -90,12 +164,33 @@
 
 				$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
 				$alias = $this->getJoinAlias($alias, $part);
-			}
+			} while ($node = $node->getNext());
+
+			// foreach ($parts as $i => $part) {
+			// 	if ($metadata->getTypeOfField($part) === Type::JSON) {
+			// 		if (isset($parts[$i + 1]))
+			// 			$items = array_slice($parts, $i + 1);
+			// 		else
+			// 			$items = [];
+			//
+			// 		$items[] = $actualField;
+			//
+			// 		$jsonKey = implode('.', $items);
+			//
+			// 		return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
+			// 	} else if (!$metadata->hasAssociation($part))
+			// 		throw new UnknownFieldException($field);
+			//
+			// 	$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
+			// 	$alias = $this->getJoinAlias($alias, $part);
+			// }
 
 			if (!$metadata->hasField($actualField))
 				throw new UnknownFieldException($field);
 
-			return $alias . '.' . $actualField;
+			$resolved = $alias . '.' . $actualField;
+
+			return $this->resolveCache[$field] = $resolved;
 		}
 
 		/**
