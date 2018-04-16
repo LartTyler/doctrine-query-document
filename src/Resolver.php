@@ -65,39 +65,26 @@
 			if (isset($this->resolveCache[$field]))
 				return $this->resolveCache[$field];
 
-			$parts = explode('.', $field);
-			$actualField = array_pop($parts);
-
-			if (!sizeof($parts)) {
-				// If $actualField isn't an association, it's a concrete field, so we can short circuit and return
-				// early
-				if (!$this->rootMetadata->hasAssociation($actualField))
-					return $this->rootAlias . '.' . $actualField;
-
-				// Otherwise, it IS an association, but since Doctrine doesn't let us query associations by their
-				// ID directly, we set $parts to the field itself, and $actualField to "id" so we can query against
-				// that.
-				$parts = [$actualField];
-				$actualField = 'id';
-			}
-
-			$node = LinkedList::fromArray($parts);
+			$next = $node = LinkedList::fromArray(explode('.', $field));
 
 			$metadata = $this->rootMetadata;
 			$alias = $this->rootAlias;
 
 			do {
+				$node = $next;
 				$part = $node->getValue();
 
 				if ($mapped = $this->getMappedField($metadata->getName(), $part)) {
+					$next = $node->getNext();
+
 					$mappedParts = explode('.', $mapped);
-					$mappedNode = new LinkedList(array_shift($mappedParts));
+					$node = $tail = new LinkedList(array_shift($mappedParts));
 
 					foreach ($mappedParts as $mappedPart)
-						$mappedNode->setNext($mappedNode = new LinkedList($mappedPart));
+						$tail->setNext($tail = new LinkedList($mappedPart));
 
-					$mappedNode->setNext($node->getNext());
-					$node->setNext($mappedNode);
+					$tail->setNext($next);
+					$part = $node->getValue();
 				}
 
 				if ($metadata->getTypeOfField($part) === Type::JSON) {
@@ -109,17 +96,19 @@
 						} while ($next = $next->getNext());
 					}
 
-					$items[] = $actualField;
-
 					$jsonKey = implode('.', $items);
 
 					return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
-				} else if (!$metadata->hasAssociation($part))
+				} else if ($metadata->hasField($part))
+					break;
+				else if (!$metadata->hasAssociation($part))
 					throw new UnknownFieldException($field);
 
 				$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
 				$alias = $this->getJoinAlias($alias, $part);
-			} while ($node = $node->getNext());
+			} while ($next = $node->getNext());
+
+			$actualField = $node->getValue();
 
 			if (!$metadata->hasField($actualField))
 				throw new UnknownFieldException($field);
