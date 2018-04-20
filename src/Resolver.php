@@ -108,7 +108,17 @@
 				$alias = $this->getJoinAlias($alias, $part);
 			} while ($next = $node->getNext());
 
-			$actualField = $node->getValue();
+			// If we broke out of our do-while, but there are still items on the stack, we've got an embedded object
+			if ($node->getNext()) {
+				$remainder = [];
+
+				do {
+					$remainder[] = $node->getValue();
+				} while ($node = $node->getNext());
+
+				$actualField = implode('.', $remainder);
+			} else
+				$actualField = $node->getValue();
 
 			if (!$metadata->hasField($actualField))
 				throw new UnknownFieldException($field);
