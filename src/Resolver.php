@@ -87,7 +87,7 @@
 					$part = $node->getValue();
 				}
 
-				if ($metadata->getTypeOfField($part) === Type::JSON) {
+				if ($metadata->getTypeOfField($part) === Type::JSON && $node->getNext()) {
 					$items = [];
 
 					if ($next = $node->getNext()) {
