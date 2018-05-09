@@ -87,7 +87,7 @@
 					$part = $node->getValue();
 				}
 
-				if ($metadata->getTypeOfField($part) === Type::JSON) {
+				if ($metadata->getTypeOfField($part) === Type::JSON && $node->getNext()) {
 					$items = [];
 
 					if ($next = $node->getNext()) {
@@ -106,6 +106,11 @@
 
 				$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
 				$alias = $this->getJoinAlias($alias, $part);
+
+				// If the last field in the list is an association, we need to make sure that we resolve to the
+				// association's ID, instead of the field name of the assocation (which will error out)
+				if (!$node->getNext())
+					$node->setNext(new LinkedList($metadata->getIdentifierFieldNames()[0]));
 			} while ($next = $node->getNext());
 
 			// If we broke out of our do-while, but there are still items on the stack, we've got an embedded object
