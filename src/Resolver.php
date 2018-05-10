@@ -78,8 +78,14 @@
 					$node->inject(LinkedList::fromArray(explode('.', $mapped)));
 
 					$part = $node->getValue();
-				} else if ($matched = $this->findReverseMappedNode($metadata->getName(), $node)) {
-					$node->inject($matched);
+				} else if ($matchData = $this->findReverseMappedNode($metadata->getName(), $node)) {
+					/**
+					 * @var int        $length
+					 * @var LinkedList $matched
+					 */
+					[$length, $matched] = $matchData;
+
+					$node->splice($matched, $length);
 
 					$part = $node->getValue();
 				}
@@ -139,19 +145,22 @@
 		 * @param string     $class
 		 * @param LinkedList $current
 		 *
-		 * @return LinkedList|null
+		 * @return array|null
 		 */
-		protected function findReverseMappedNode(string $class, LinkedList $current): ?LinkedList {
+		protected function findReverseMappedNode(string $class, LinkedList $current): ?array {
 			if (!$current->getNext() || !$this->hasMappedFields($class))
 				return null;
 
 			$joined = $current->getValue();
+			$length = 1;
 
 			while ($current = $current->getNext()) {
+				++$length;
+
 				$joined .= '.' . $current->getValue();
 
 				if ($matched = $this->getMappedField($class, $joined))
-					return LinkedList::fromArray(explode('.', $matched));
+					return [$length, LinkedList::fromArray(explode('.', $matched))];
 			}
 
 			return null;
