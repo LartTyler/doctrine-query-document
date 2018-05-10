@@ -47,6 +47,35 @@
 		}
 
 		/**
+		 * Removes the number of elements specified by $length, and injects the provided list. If $length is zero, or
+		 * longer than the length of the list, all following elements will be removed prior to injecting the provided
+		 * list.
+		 *
+		 * @param LinkedList $list
+		 * @param int        $length
+		 *
+		 * @return $this
+		 */
+		public function splice(LinkedList $list, $length = 0) {
+			if ($this->getNext() && $length > 0) {
+				for ($i = 0; $i < $length; $i++) {
+					$next = $this->getNext()->getNext();
+
+					if (!$next) {
+						$this->setNext(null);
+
+						break;
+					}
+
+					$this->setNext($next);
+				}
+			} else
+				$this->setNext(null);
+
+			return $this->inject($list);
+		}
+
+		/**
 		 * @param LinkedList $list
 		 *
 		 * @return $this
