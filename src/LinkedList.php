@@ -47,6 +47,48 @@
 		}
 
 		/**
+		 * @param LinkedList $list
+		 *
+		 * @return $this
+		 */
+		public function inject(LinkedList $list) {
+			$this->value = $list->getValue();
+
+			// If the current node has no next item, we can blindly call setNext() and stop processing early
+			if (!$this->getNext()) {
+				$this->setNext($list->getNext());
+
+				return $this;
+				// Otherwise, if the injected list's head has no next item, we don't even need to call setNext() at all
+			} else if (!$list->getNext())
+				return $this;
+
+			$oldNext = $this->getNext();
+			$this->setNext($tail = $list->getNext());
+
+			while ($tail->getNext())
+				$tail = $tail->getNext();
+
+			$tail->setNext($oldNext);
+
+			return $this;
+		}
+
+		/**
+		 * @return mixed[]
+		 */
+		public function all(): array {
+			$node = $this;
+			$all = [];
+
+			do {
+				$all[] = $node->getValue();
+			} while ($node = $node->getNext());
+
+			return $all;
+		}
+
+		/**
 		 * @param array $items
 		 *
 		 * @return static

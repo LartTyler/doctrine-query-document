@@ -20,6 +20,15 @@
 		}
 
 		/**
+		 * @param string $class
+		 *
+		 * @return bool
+		 */
+		public function hasMappedFields(string $class): bool {
+			return isset($this->mappedFields[$class]);
+		}
+
+		/**
 		 * {@inheritdoc}
 		 */
 		public function getMappedField(string $class, string $field): ?string {

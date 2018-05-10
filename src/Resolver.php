@@ -75,28 +75,17 @@
 				$part = $node->getValue();
 
 				if ($mapped = $this->getMappedField($metadata->getName(), $part)) {
-					$next = $node->getNext();
+					$node->inject(LinkedList::fromArray(explode('.', $mapped)));
 
-					$mappedParts = explode('.', $mapped);
-					$node = $tail = new LinkedList(array_shift($mappedParts));
+					$part = $node->getValue();
+				} else if ($matched = $this->findReverseMappedNode($metadata->getName(), $node)) {
+					$node->inject($matched);
 
-					foreach ($mappedParts as $mappedPart)
-						$tail->setNext($tail = new LinkedList($mappedPart));
-
-					$tail->setNext($next);
 					$part = $node->getValue();
 				}
 
 				if ($metadata->getTypeOfField($part) === Type::JSON && $node->getNext()) {
-					$items = [];
-
-					if ($next = $node->getNext()) {
-						do {
-							$items[] = $next->getValue();
-						} while ($next = $next->getNext());
-					}
-
-					$jsonKey = implode('.', $items);
+					$jsonKey = implode('.', $node->getNext() ? $node->getNext()->all() : []);
 
 					return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
 				} else if ($metadata->hasField($part))
@@ -108,20 +97,14 @@
 				$alias = $this->getJoinAlias($alias, $part);
 
 				// If the last field in the list is an association, we need to make sure that we resolve to the
-				// association's ID, instead of the field name of the assocation (which will error out)
+				// association's ID, instead of the field name of the association (which will error out)
 				if (!$node->getNext())
 					$node->setNext(new LinkedList($metadata->getIdentifierFieldNames()[0]));
 			} while ($next = $node->getNext());
 
 			// If we broke out of our do-while, but there are still items on the stack, we've got an embedded object
 			if ($node->getNext()) {
-				$remainder = [];
-
-				do {
-					$remainder[] = $node->getValue();
-				} while ($node = $node->getNext());
-
-				$actualField = implode('.', $remainder);
+				$actualField = implode('.', $node->all());
 			} else
 				$actualField = $node->getValue();
 
@@ -150,5 +133,27 @@
 			$this->qb->leftJoin($joinKey, $alias);
 
 			return $this->joins[$joinKey] = $alias;
+		}
+
+		/**
+		 * @param string     $class
+		 * @param LinkedList $current
+		 *
+		 * @return LinkedList|null
+		 */
+		protected function findReverseMappedNode(string $class, LinkedList $current): ?LinkedList {
+			if (!$current->getNext() || !$this->hasMappedFields($class))
+				return null;
+
+			$joined = $current->getValue();
+
+			while ($current = $current->getNext()) {
+				$joined .= '.' . $current->getValue();
+
+				if ($matched = $this->getMappedField($class, $joined))
+					return LinkedList::fromArray(explode('.', $matched));
+			}
+
+			return null;
 		}
 	}
