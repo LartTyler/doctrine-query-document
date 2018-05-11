@@ -114,6 +114,19 @@ alias the field like so.
     ]);
 ```
 
+This can also work in reverse, allowing you to query a field that appears to be on a related object (or, more usefully, an array of related objects). For example, assume `MyEntity` has a one-to-many relationship with `MyOtherEntity`. `MyEntity` has a field named `otherEntitiesLength`, which holds a count of the number of elements in the `otherEntities` collection.
+
+```php
+<?php
+    $manager->setMappedField('App\\Entity\\MyEntity', 'otherEntities.length', 'otherEntitiesLength');
+    
+    $manager->apply($queryBuilder, [
+        'otherEntities.length' => [
+            '$gte' => 1,
+        ],
+    ]);
+```
+
 # Custom Operators
 You can add custom operator classes by implementing `DaybreakStudios\DoctrineQueryDocument\OperatorInterface`, or by
 extending `DaybreakStudios\DoctrineQueryDocument\Operators\AbstractOperator`.
