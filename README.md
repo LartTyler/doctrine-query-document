@@ -127,6 +127,77 @@ This can also work in reverse, allowing you to query a field that appears to be 
     ]);
 ```
 
+# Field Projection
+This library ships with a handy utility class that allows you to easily apply projections to result sets.
+
+```php
+<?php
+    // $objectManager should be an instance of Doctrine\Common\Persistence\ObjectManager
+    
+    $manager = new QueryManager($objectManager);
+    $queryBuilder = $objectManager->createQueryBuilder()
+        ->from('App\Entity\MyEntity', 'e')
+        ->select('e');
+    
+    $manager->apply($queryBuilder, [
+    	'field' => 'value',
+    ]);
+    
+    $projection = new Projection([
+    	'id' => true,
+    	'field' => true,
+    	'otherEntity' => [
+    		'id' => true,
+    		'someField' => true,
+        ],
+    ]);
+    
+    echo json_encode(array_map(function(MyEntity $entity) use ($projection): array {
+    	$data = [
+            'id' => $entity->getId(),
+            'name' => $entity->getName(),
+            'field' => $entity->getField(),
+        ];
+    	
+    	if ($projection->isAllowed('otherEntity')) {
+    		$other = $entity->getOtherEntity();
+    		
+    		$data['otherEntity'] = [
+    			'id' => $other->getId(),
+    			'someField' => $other->getSomeField(),
+    			'someOtherField' => $other->getSomeOtherField(),
+            ];
+    	}
+    	
+    	return $projection->filter($data);
+    }, $queryBuilder->getQuery()->getResult()));
+    
+    // [{"id": 1, "field": "value", "otherEntity": {"id": 1, "someField": "value"}}, ...]
+```
+
+Projections can also be inverted by supplying `false` as the value of each node in the constructor argument.
+
+There's also a static convenience method on `Projection` that allows you to build the projection object from a flat
+object of string paths, like so.
+
+```php
+<?php
+    $input = [
+    	'id' => true,
+    	'field' => true,
+    	'otherEntity.id' => true,
+    	'otherEntity.someField' => true,
+    ];
+    
+    // set up QueryManager
+    
+    $projection = Projection::fromFields($input);
+```
+
+In the above example, the resulting `Projection` object would be the same as the one in the original example. In some
+cases, it may be more convenient to supply a flat map of paths, instead of a potentially deep array of paths (i.e. when
+the projected fields are coming in from an API input).
+
 # Custom Operators
 You can add custom operator classes by implementing `DaybreakStudios\DoctrineQueryDocument\OperatorInterface`, or by
 extending `DaybreakStudios\DoctrineQueryDocument\Operators\AbstractOperator`.
