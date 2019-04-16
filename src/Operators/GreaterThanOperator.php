@@ -17,10 +17,10 @@
 		 * {@inheritdoc}
 		 */
 		protected function validate(string $field, $value): void {
-			if (is_numeric($value))
+			if (is_numeric($value) || is_string($value))
 				return;
 
-			throw new InvalidFieldValueException($field, 'number', $this->getKey());
+			throw new InvalidFieldValueException($field, 'number or string', $this->getKey());
 		}
 
 		protected function doProcess(
