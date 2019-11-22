@@ -4,3 +4,7 @@ composer.phar
 
 # Vagrant files
 /.vagrant
+
+# PHP Until Files
+/phpunit.xml
+/.phpunit.result.cache
