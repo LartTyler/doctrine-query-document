@@ -251,10 +251,11 @@ You may also pass an array of custom operators as the second argument to `QueryD
 
 # Built-in Operators
 By default, this packages comes with several operators that will be automatically registered with instances of
-`DaybreakStudios\DoctrineQueryDocument\QueryManager`.
+`DaybreakStudios\DoctrineQueryDocument\QueryManager`. You may choose to skip registering built-in operators when
+creating your query manager by passing `false` as the third argument in the constructor.
 
-Since operators are based on MongoDB's query operators, please see Mongo's documentation for information on using the
-operators.
+Since most operators are based on MongoDB's query operators, please see Mongo's documentation for information on using
+the operators.
 
 |Operator|Accepted Argument(s)|Documentation|
 |:---|:---|:---|
@@ -271,6 +272,35 @@ operators.
 |`$like`|String|A MySQL style LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
 |`$nlike`|String|A negated MySQL LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
 |`$exists`|Boolean|[Link](https://docs.mongodb.com/manual/reference/operator/query/exists/#op._S_exists)|
+|`$size`|Number or Operators|[Link](https://docs.mongodb.com/manual/reference/operator/query/size/) \[[see below](#size-operator)\]|
 
-You may choose to skip registering built-in operators when creating your query manager by passing `false` as the third
-argument in the constructor.
+### Size Operator
+The size operator accepts two different types of values. The first is the same type documented in the MongoDB docs: an
+integer to match exact equality to.
+
+```json
+{
+    "field": {
+        "$size": 5
+    }
+}
+```
+
+The second is a more complex form, allowing you to use any other comparison operator to match the collection size.
+
+```json
+{
+    "collection": {
+        "$size": {
+            "$gt": 0
+        }
+    },
+    "otherCollection": {
+        "$size": {
+            "$in": [1, 2, 3]
+        }
+    }
+}
+```
+
+This operator utilizes Doctrine's `SIZE` DQL function to retrieve the number of elements in a to-many association.
