@@ -22,6 +22,7 @@
 			Operators\OrOperator::class,
 			Operators\AndOperator::class,
 			Operators\ExistsOperator::class,
+			Operators\SizeOperator::class,
 		];
 
 		/**

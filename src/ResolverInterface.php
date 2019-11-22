@@ -44,8 +44,9 @@
 
 		/**
 		 * @param string $field
+		 * @param array  $context
 		 *
 		 * @return string
 		 */
-		public function resolve(string $field): string;
+		public function resolve(string $field, array $context = []): string;
 	}
