@@ -11,11 +11,11 @@
 
 		/**
 		 * @param QueryDocumentInterface $document
-		 * @param string                 $field
+		 * @param object|string          $field
 		 * @param mixed                  $value
 		 * @param Composite              $parent
 		 *
 		 * @return void
 		 */
-		public function process(QueryDocumentInterface $document, string $field, $value, Composite $parent): void;
+		public function process(QueryDocumentInterface $document, $field, $value, Composite $parent): void;
 	}

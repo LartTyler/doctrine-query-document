@@ -47,10 +47,12 @@
 				$where->add($this->rootComposite);
 			else {
 				if ($where !== null)
-					$this->rootComposite = new Andx([
-						$where,
-						$this->rootComposite,
-					]);
+					$this->rootComposite = new Andx(
+						[
+							$where,
+							$this->rootComposite,
+						]
+					);
 
 				$qb->where($this->rootComposite);
 			}
@@ -58,95 +60,101 @@
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function eq(?Composite $node, string $x, $y): void {
-			if ($y === null)
-				($node ?? $this->rootComposite)->add($this->resolver->resolve($x) . ' IS NULL');
-			else
+		public function eq(?Composite $node, $x, $y): void {
+			if ($y === null) {
+				if (is_string($x))
+					$x = $this->resolver->resolve($x);
+
+				($node ?? $this->rootComposite)->add($x . ' IS NULL');
+			} else
 				$this->addComparison($node, $x, Comparison::EQ, $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function neq(?Composite $node, string $x, $y): void {
-			if ($y === null)
-				($node ?? $this->rootComposite)->add($this->resolver->resolve($x) . ' IS NOT NULL');
-			else
+		public function neq(?Composite $node, $x, $y): void {
+			if ($y === null) {
+				if (is_string($x))
+					$x = $this->resolver->resolve($x);
+
+				($node ?? $this->rootComposite)->add($x . ' IS NOT NULL');
+			} else
 				$this->addComparison($node, $x, Comparison::NEQ, $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function lt(?Composite $node, string $x, $y): void {
+		public function lt(?Composite $node, $x, $y): void {
 			$this->addComparison($node, $x, Comparison::LT, $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function lte(?Composite $node, string $x, $y): void {
+		public function lte(?Composite $node, $x, $y): void {
 			$this->addComparison($node, $x, Comparison::LTE, $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function gt(?Composite $node, string $x, $y): void {
+		public function gt(?Composite $node, $x, $y): void {
 			$this->addComparison($node, $x, Comparison::GT, $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function gte(?Composite $node, string $x, $y): void {
+		public function gte(?Composite $node, $x, $y): void {
 			$this->addComparison($node, $x, Comparison::GTE, $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function like(?Composite $node, string $x, $y): void {
+		public function like(?Composite $node, $x, $y): void {
 			$this->addComparison($node, $x, 'LIKE', $y);
 		}
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		public function notLike(?Composite $node, string $x, $y): void {
+		public function notLike(?Composite $node, $x, $y): void {
 			$this->addComparison($node, $x, 'NOT LIKE', $y);
 		}
 
@@ -228,14 +236,17 @@
 
 		/**
 		 * @param Composite|null $node
-		 * @param string         $x
+		 * @param object|string  $x
 		 * @param string         $infix
 		 * @param mixed          $y
 		 *
 		 * @return void
 		 */
-		protected function addComparison(?Composite $node, string $x, string $infix, $y): void {
-			$comparison = new Comparison($this->resolver->resolve($x), $infix, $this->getParamKey());
+		public function addComparison(?Composite $node, $x, string $infix, $y): void {
+			if (is_string($x))
+				$x = $this->resolver->resolve($x);
+
+			$comparison = new Comparison($x, $infix, $this->getParamKey());
 
 			$this->addParameterExpression($node, $comparison, $y);
 		}
@@ -243,7 +254,7 @@
 		/**
 		 * @return string
 		 */
-		protected function getParamKey(): string {
+		public function getParamKey(): string {
 			return '?' . $this->paramIndex;
 		}
 
@@ -254,7 +265,7 @@
 		 *
 		 * @return void
 		 */
-		protected function addParameterExpression(?Composite $node, $expr, $value): void {
+		public function addParameterExpression(?Composite $node, $expr, $value): void {
 			($node ?? $this->rootComposite)->add($expr);
 
 			$this->addParameter($value);
@@ -263,9 +274,12 @@
 		/**
 		 * @param mixed $value
 		 *
-		 * @return void
+		 * @return string
 		 */
-		protected function addParameter($value): void {
+		public function addParameter($value): string {
+			$key = $this->getParamKey();
 			$this->qb->setParameter($this->paramIndex++, $value);
+
+			return $key;
 		}
 	}

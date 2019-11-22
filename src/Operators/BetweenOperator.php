@@ -28,7 +28,7 @@
 		 */
 		protected function doProcess(
 			QueryDocumentInterface $document,
-			string $field,
+			$field,
 			$value,
 			Composite $parent
 		): void {
