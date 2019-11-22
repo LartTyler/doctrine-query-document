@@ -1,4 +1,6 @@
+# Composer files
 composer.phar
 /vendor/
 
-/.idea/
+# Vagrant files
+/.vagrant
