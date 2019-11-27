@@ -32,7 +32,7 @@
 		 */
 		public function process(
 			QueryDocumentInterface $document,
-			string $field,
+			$field,
 			$value,
 			Composite $parent
 		): void {
@@ -51,7 +51,7 @@
 
 		/**
 		 * @param QueryDocumentInterface $document
-		 * @param string                 $field
+		 * @param string|object          $field
 		 * @param mixed                  $value
 		 * @param Composite              $parent
 		 *
@@ -59,7 +59,7 @@
 		 */
 		protected abstract function doProcess(
 			QueryDocumentInterface $document,
-			string $field,
+			$field,
 			$value,
 			Composite $parent
 		): void;

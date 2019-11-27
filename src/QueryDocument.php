@@ -110,26 +110,12 @@
 			$parent = $parent ?? $this->rootComposite;
 
 			foreach ($query as $key => $value) {
-				if (strpos($key, '$') === 0) {
-					$operator = $this->getQueryManager()->getOperator($key);
-
-					if (!$operator)
-						throw new UnknownOperatorException($key);
-
-					$operator->process($this, $key, $value, $parent);
-				} else {
+				if (strpos($key, '$') === 0)
+					$this->invokeOperator($parent, $key, $key, $value);
+				else {
 					if (is_array($value)) {
-						foreach ($value as $itemKey => $item) {
-							if (strpos($itemKey, '$') !== 0)
-								throw new \InvalidArgumentException('Invalid key in filter document for ' . $key);
-
-							$operator = $this->getQueryManager()->getOperator($itemKey);
-
-							if (!$operator)
-								throw new UnknownOperatorException($itemKey);
-
-							$operator->process($this, $key, $item, $parent);
-						}
+						foreach ($value as $itemKey => $item)
+							$this->invokeOperator($parent, $itemKey, $key, $item);
 					} else
 						$this->expr()->eq($parent, $key, $value);
 				}
@@ -137,5 +123,25 @@
 
 			if (--$this->processDepth === 0)
 				$this->applied = true;
+		}
+
+		/**
+		 * @param Composite $parent
+		 * @param string    $operatorKey
+		 * @param string    $field
+		 * @param mixed     $value
+		 *
+		 * @return void
+		 */
+		protected function invokeOperator(Composite $parent, string $operatorKey, string $field, $value): void {
+			if (strpos($operatorKey, '$') !== 0)
+				throw new \InvalidArgumentException('Invalid key in filter document for ' . $operatorKey);
+
+			$operator = $this->getQueryManager()->getOperator($operatorKey);
+
+			if (!$operator)
+				throw new UnknownOperatorException($operatorKey);
+
+			$operator->process($this, $field, $value, $parent);
 		}
 	}

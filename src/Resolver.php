@@ -61,9 +61,15 @@
 		/**
 		 * {@inheritdoc}
 		 */
-		public function resolve(string $field): string {
+		public function resolve(string $field, array $context = []): string {
 			if (isset($this->resolveCache[$field]))
 				return $this->resolveCache[$field];
+			else if (!($context[ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID] ?? true)) {
+				$key = '@' . $field;
+
+				if (isset($this->resolveCache[$key]))
+					return $this->resolveCache[$key];
+			}
 
 			$next = $node = LinkedList::fromArray(explode('.', $field));
 
@@ -98,6 +104,9 @@
 					break;
 				else if (!$metadata->hasAssociation($part))
 					throw new UnknownFieldException($field);
+
+				if (!$node->getNext() && !($context[ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID] ?? true))
+					return $alias . '.' . $part;
 
 				$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
 				$alias = $this->getJoinAlias($alias, $part);
