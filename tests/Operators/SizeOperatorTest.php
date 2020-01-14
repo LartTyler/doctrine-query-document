@@ -2,6 +2,7 @@
 	namespace Operators;
 
 	use DaybreakStudios\DoctrineQueryDocument\QueryManager;
+	use Doctrine\DBAL\Types\Type;
 	use Doctrine\ORM\EntityManager;
 	use Doctrine\ORM\Mapping\ClassMetadata;
 	use Doctrine\ORM\QueryBuilder;
@@ -67,6 +68,69 @@
 			);
 
 			$this->assertEquals('SELECT e FROM Entity e WHERE SIZE(e.related) >= ?0', $qb->getDQL());
+		}
+
+		/**
+		 * @return void
+		 */
+		public function testJsonSize(): void {
+			$em = $this->createMock(EntityManager::class);
+			$rootMetadata = $this->createMock(ClassMetadata::class);
+
+			$rootMetadata->expects($this->any())
+				->method('getName')
+				->willReturn('Entity');
+
+			$rootMetadata->expects($this->any())
+				->method('hasField')
+				->with('json')
+				->willReturn(true);
+
+			$rootMetadata->expects($this->any())
+				->method('getTypeOfField')
+				->with('json')
+				->willReturn(Type::JSON);
+
+			$em->expects($this->any())
+				->method('getClassMetadata')
+				->willReturn($rootMetadata);
+
+			$qm = new QueryManager($em);
+
+			$qm->apply(
+				$qb = $this->createQueryBuilder($em),
+				[
+					'json' => [
+						'$size' => 1,
+					],
+				]
+			);
+
+			$this->assertEquals('SELECT e FROM Entity e WHERE JSON_LENGTH(e.json) = ?0', $qb->getDQL());
+
+			$qm->apply(
+				$qb = $this->createQueryBuilder($em),
+				[
+					'json' => [
+						'$size' => [
+							'$gte' => 1,
+						],
+					],
+				]
+			);
+
+			$this->assertEquals('SELECT e FROM Entity e WHERE JSON_LENGTH(e.json) >= ?0', $qb->getDQL());
+
+			$qm->apply(
+				$qb = $this->createQueryBuilder($em),
+				[
+					'json.field' => [
+						'$size' => 1,
+					],
+				]
+			);
+
+			$this->assertEquals('SELECT e FROM Entity e WHERE JSON_LENGTH(e.json, \'$.field\') = ?0', $qb->getDQL());
 		}
 
 		/**

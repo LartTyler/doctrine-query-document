@@ -41,6 +41,11 @@
 		protected $resolveCache = [];
 
 		/**
+		 * @var ClassMetadata[]
+		 */
+		protected $loadedMetadata = [];
+
+		/**
 		 * Resolver constructor.
 		 *
 		 * @param ObjectManager $manager
@@ -77,6 +82,8 @@
 			$alias = $this->rootAlias;
 
 			do {
+				$this->loadedMetadata[$alias] = $metadata;
+
 				$node = $next;
 				$part = $node->getValue();
 
@@ -108,8 +115,15 @@
 				if (!$node->getNext() && !($context[ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID] ?? true))
 					return $alias . '.' . $part;
 
-				$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
 				$alias = $this->getJoinAlias($alias, $part);
+
+				if (isset($this->loadedMetadata[$alias]))
+					$metadata = $this->loadedMetadata[$alias];
+				else {
+					$metadata = $this->manager->getClassMetadata($metadata->getAssociationTargetClass($part));
+
+					$this->loadedMetadata[$alias] = $metadata;
+				}
 
 				// If the last field in the list is an association, we need to make sure that we resolve to the
 				// association's ID, instead of the field name of the association (which will error out)
@@ -129,6 +143,15 @@
 			$resolved = $alias . '.' . $actualField;
 
 			return $this->resolveCache[$field] = $resolved;
+		}
+
+		/**
+		 * @param string $alias
+		 *
+		 * @return ClassMetadata|null
+		 */
+		public function getMetadata(string $alias): ?ClassMetadata {
+			return $this->loadedMetadata[$alias] ?? null;
 		}
 
 		/**

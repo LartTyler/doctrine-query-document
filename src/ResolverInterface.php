@@ -1,6 +1,8 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
+	use Doctrine\ORM\Mapping\ClassMetadata;
+
 	interface ResolverInterface {
 		/**
 		 * @param string $class
@@ -49,4 +51,11 @@
 		 * @return string
 		 */
 		public function resolve(string $field, array $context = []): string;
+
+		/**
+		 * @param string $alias
+		 *
+		 * @return ClassMetadata|null
+		 */
+		public function getMetadata(string $alias): ?ClassMetadata;
 	}
