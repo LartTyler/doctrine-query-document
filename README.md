@@ -273,6 +273,8 @@ the operators.
 |`$nlike`|String|A negated MySQL LIKE string ([Link](https://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like))|
 |`$exists`|Boolean|[Link](https://docs.mongodb.com/manual/reference/operator/query/exists/#op._S_exists)|
 |`$size`|Number or Operators|[Link](https://docs.mongodb.com/manual/reference/operator/query/size/) \[[see below](#size-operator)\]|
+|`$contains`|Scalar|[see below](#contains-operator)|
+|`$ncontains`|Scalar|[see below](#not-contains-operator)|
 
 ### Size Operator
 The size operator accepts two different types of values. The first is the same type documented in the MongoDB docs: an
@@ -304,3 +306,31 @@ The second is a more complex form, allowing you to use any other comparison oper
 ```
 
 This operator utilizes Doctrine's `SIZE` DQL function to retrieve the number of elements in a to-many association.
+
+### Contains Operator
+The `$contains` operator allows you to test if a collection or JSON array contains a given value.
+
+When used on collection valued associations, Doctrine's `MEMBER OF` syntax is used to test if the given value is
+contained in the collection.
+
+```json
+{
+    "collection": {
+        "$contains": 1
+    }
+}
+```
+
+The `$contains` operator can also be used on JSON fields, or on fields embedded within JSON fields.
+
+```json
+{
+    "json.nested.field": {
+        "$contains": 1
+    }
+}
+```
+
+### Not Contains Operator
+This is the negated form of the `$contains` operator. Refer to the documentation for [`$contains`](#contains-operator)
+for more info.
