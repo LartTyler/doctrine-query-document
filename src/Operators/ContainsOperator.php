@@ -14,13 +14,6 @@
 		 */
 		public function __construct() {
 			parent::__construct('contains');
-
-			// {"campaigns":{"$memberOf":1}}
-			// {"campaigns":{"$hasMember":1}}
-
-			// {"campaigns":{"$contains":1}} -> ?0 MEMBER OF campaigns
-			// {"someJsonField":{"$contains":1}} -> JSON_CONTAINS(someJsonField, ?0)
-			// {"someJsonField.embeddedArray":{"$contains":1}} -> JSON_CONTAINS(someJsonField, ?0, '$.embeddedArray')
 		}
 
 		/**
