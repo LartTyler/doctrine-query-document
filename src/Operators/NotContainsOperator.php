@@ -10,7 +10,7 @@
 
 	class NotContainsOperator extends AbstractOperator {
 		/**
-		 * NotMemberOfOperator constructor.
+		 * NotContainsOperator constructor.
 		 */
 		public function __construct() {
 			parent::__construct('ncontains');
