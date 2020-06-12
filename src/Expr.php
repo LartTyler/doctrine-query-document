@@ -198,6 +198,50 @@
 
 		/**
 		 * @param Composite|null $node
+		 * @param string         $field
+		 * @param int            $value
+		 *
+		 * @return void
+		 */
+		public function memberOf(?Composite $node, string $field, int $value) {
+			($node ?? $this->rootComposite)->add(
+				sprintf(
+					'%s MEMBER OF %s',
+					$this->addParameter($value),
+					$this->resolver->resolve(
+						$field,
+						[
+							ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID => false,
+						]
+					)
+				)
+			);
+		}
+
+		/**
+		 * @param Composite|null $node
+		 * @param string         $field
+		 * @param int            $value
+		 *
+		 * @return void
+		 */
+		public function notMemberOf(?Composite $node, string $field, int $value) {
+			($node ?? $this->rootComposite)->add(
+				sprintf(
+					'%s NOT MEMBER OF %s',
+					$this->addParameter($value),
+					$this->resolver->resolve(
+						$field,
+						[
+							ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID => false,
+						]
+					)
+				)
+			);
+		}
+
+		/**
+		 * @param Composite|null $node
 		 * @param array          $items
 		 *
 		 * @return void
