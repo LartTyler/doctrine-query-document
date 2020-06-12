@@ -23,8 +23,8 @@
 			Operators\AndOperator::class,
 			Operators\ExistsOperator::class,
 			Operators\SizeOperator::class,
-			Operators\MemberOfOperator::class,
-			Operators\NotMemberOfOperator::class,
+			Operators\ContainsOperator::class,
+			Operators\NotContainsOperator::class,
 		];
 
 		/**
