@@ -106,6 +106,9 @@
 				if ($metadata->getTypeOfField($part) === Type::JSON && $node->getNext()) {
 					$jsonKey = implode('.', $node->getNext() ? $node->getNext()->all() : []);
 
+					if (!($context[ResolverContext::RESOLVE_EMBEDDED_JSON_TO_EXTRACT_FUNC] ?? true))
+						return implode('.', [$alias, $part, $jsonKey]);
+
 					return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
 				} else if ($metadata->hasField($part))
 					break;

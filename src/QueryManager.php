@@ -23,6 +23,8 @@
 			Operators\AndOperator::class,
 			Operators\ExistsOperator::class,
 			Operators\SizeOperator::class,
+			Operators\ContainsOperator::class,
+			Operators\NotContainsOperator::class,
 		];
 
 		/**
@@ -64,6 +66,18 @@
 		/**
 		 * {@inheritdoc}
 		 */
+		public function setOperators(array $operators) {
+			$this->operators = [];
+
+			foreach ($operators as $operator)
+				$this->setOperator($operator);
+
+			return $this;
+		}
+
+		/**
+		 * {@inheritdoc}
+		 */
 		public function getOperator(string $key): ?OperatorInterface {
 			if (strpos($key, '$') === 0)
 				$key = substr($key, 1);
@@ -72,18 +86,6 @@
 				return $this->operators[$key];
 
 			return null;
-		}
-
-		/**
-		 * {@inheritdoc}
-		 */
-		public function setOperators(array $operators) {
-			$this->operators = [];
-
-			foreach ($operators as $operator)
-				$this->setOperator($operator);
-
-			return $this;
 		}
 
 		/**
