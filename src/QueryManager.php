@@ -2,8 +2,8 @@
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
 	use DaybreakStudios\DoctrineQueryDocument\Operators;
-	use Doctrine\Common\Persistence\ObjectManager;
 	use Doctrine\ORM\QueryBuilder;
+	use Doctrine\Persistence\ObjectManager;
 
 	class QueryManager implements QueryManagerInterface {
 		use MappedFieldsTrait;

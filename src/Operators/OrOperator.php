@@ -3,6 +3,7 @@
 
 	use DaybreakStudios\DoctrineQueryDocument\Exception\InvalidFieldValueException;
 	use DaybreakStudios\DoctrineQueryDocument\QueryDocumentInterface;
+	use Doctrine\ORM\Query\Expr\Andx;
 	use Doctrine\ORM\Query\Expr\Composite;
 	use Doctrine\ORM\Query\Expr\Orx;
 
@@ -32,8 +33,11 @@
 		): void {
 			$orX = new Orx();
 
-			foreach ($value as $item)
-				$document->process($item, $orX);
+			foreach ($value as $item) {
+				$document->process($item, $node = new Andx());
+
+				$orX->add($node);
+			}
 
 			$parent->add($orX);
 		}

@@ -2,10 +2,10 @@
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownFieldException;
-	use Doctrine\Common\Persistence\ObjectManager;
 	use Doctrine\DBAL\Types\Type;
 	use Doctrine\ORM\Mapping\ClassMetadata;
 	use Doctrine\ORM\QueryBuilder;
+	use Doctrine\Persistence\ObjectManager;
 
 	class Resolver implements ResolverInterface {
 		use MappedFieldsTrait;

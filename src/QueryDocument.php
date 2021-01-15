@@ -3,10 +3,10 @@
 
 	use DaybreakStudios\DoctrineQueryDocument\Exception\DocumentAlreadyAppliedException;
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownOperatorException;
-	use Doctrine\Common\Persistence\ObjectManager;
 	use Doctrine\ORM\Query\Expr\Andx;
 	use Doctrine\ORM\Query\Expr\Composite;
 	use Doctrine\ORM\QueryBuilder;
+	use Doctrine\Persistence\ObjectManager;
 
 	class QueryDocument implements QueryDocumentInterface {
 		/**
