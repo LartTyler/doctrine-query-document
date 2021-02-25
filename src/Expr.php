@@ -34,7 +34,7 @@
 		 *
 		 * @param QueryBuilder      $qb
 		 * @param ResolverInterface $resolver
-		 * @param Composite         $rootComposite
+		 * @param Composite|null    $rootComposite
 		 */
 		public function __construct(QueryBuilder $qb, ResolverInterface $resolver, ?Composite $rootComposite = null) {
 			$this->qb = $qb;
