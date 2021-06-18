@@ -17,7 +17,7 @@
 		 * {@inheritdoc}
 		 */
 		protected function validate(string $field, $value): void {
-			if (is_scalar($value))
+			if (is_scalar($value) || $value === null)
 				return;
 
 			throw new InvalidFieldValueException($field, 'scalar', $this->getKey());
