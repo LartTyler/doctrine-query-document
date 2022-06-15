@@ -2,7 +2,7 @@
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownFieldException;
-	use Doctrine\DBAL\Types\Type;
+	use Doctrine\DBAL\Types\Types;
 	use Doctrine\ORM\Mapping\ClassMetadata;
 	use Doctrine\ORM\QueryBuilder;
 	use Doctrine\Persistence\ObjectManager;
@@ -103,7 +103,7 @@
 					$part = $node->getValue();
 				}
 
-				if ($metadata->getTypeOfField($part) === Type::JSON && $node->getNext()) {
+				if ($metadata->getTypeOfField($part) === Types::JSON && $node->getNext()) {
 					$jsonKey = implode('.', $node->getNext() ? $node->getNext()->all() : []);
 
 					if (!($context[ResolverContext::RESOLVE_EMBEDDED_JSON_TO_EXTRACT_FUNC] ?? true))
