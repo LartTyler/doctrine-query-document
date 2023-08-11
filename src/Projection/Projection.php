@@ -26,12 +26,12 @@
 			$this->nodes = $nodes;
 			$this->cache = new ProjectionPathCache();
 
-			if (sizeof($nodes) === 0)
+			if (count($nodes) === 0)
 				$this->default = true;
 			else {
 				// If an element is not matched, the default behavior is the opposite of the value of the first element.
-				// For example, for an include projection, any element not found in $nodes should be rejected (the opposite
-				// of the value of the include projections, whose values are all true).
+				// For example, for an include projection, any element not found in $nodes should be rejected (the
+				// opposite of the value of the include projections, whose values are all true).
 
 				$current = reset($nodes);
 
@@ -57,12 +57,17 @@
 		}
 
 		/**
-		 * @param string $path
+		 * Queries the projection for the given path, returning an integer representation of the {@see QueryResult}
+		 * for the query.
 		 *
-		 * @return bool
+		 * @param string $path
+		 * @param bool   $useCache if `false`, skip checking for a cached result; the new result will be written to
+		 *                         the cache
+		 *
+		 * @return int
 		 */
-		public function isAllowed(string $path): bool {
-			if ($this->cache->has($path))
+		public function query(string $path, bool $useCache = true): int {
+			if ($useCache && $this->cache->has($path))
 				return $this->cache->get($path);
 
 			$current = $this->getNodes();
@@ -72,32 +77,39 @@
 				return true;
 
 			$parts = explode('.', $path);
-			$result = null;
+			$result = QueryResult::from($this->isAllowedByDefault(), false);
 
 			foreach ($parts as $part) {
-				if (!isset($current[$part])) {
-					$result = $this->isAllowedByDefault();
-
+				if (!isset($current[$part]))
 					break;
-				}
 
 				$value = $current[$part];
 
 				if (!is_array($value)) {
-					$result = $value;
-
+					$result = QueryResult::from($value, true);
 					break;
 				}
 
 				$current = $value;
 			}
 
-			// If $current is an array after processing all path parts, the path has child nodes and needs to be
-			// allowed so that it can be processed later.
-			if ($result === null && is_array($current))
-				$result = true;
-
 			return $this->cache->set($path, $result);
+		}
+
+		public function isAllowed(string $path, bool $useCache = true): bool {
+			return QueryResult::isAllow($this->query($path, $useCache));
+		}
+
+		public function isAllowedExplicitly(string $path, bool $useCache = true): bool {
+			return QueryResult::isExplicitAllow($this->query($path, $useCache));
+		}
+
+		public function isDenied(string $path, bool $useCache = true): bool {
+			return QueryResult::isDeny($this->query($path, $useCache));
+		}
+
+		public function isDeniedExplicitly(string $path, bool $useCache = true): bool {
+			return QueryResult::isExplicitDeny($this->query($path, $useCache));
 		}
 
 		/**
@@ -115,7 +127,7 @@
 				if (!$this->isAllowed($path))
 					continue;
 
-				if (is_array($value) && $count = sizeof($value)) {
+				if (is_array($value) && count($value) > 0) {
 					if (isset($value[0])) {
 						if (is_array($value[0])) {
 							foreach ($value as $index => $item)

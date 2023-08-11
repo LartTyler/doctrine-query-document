@@ -3,17 +3,17 @@
 
 	class ProjectionPathCache {
 		/**
-		 * @var array
+		 * @var array<string, int>
 		 */
 		protected $data = [];
 
 		/**
 		 * @param string $path
-		 * @param bool   $value
+		 * @param int   $value {@see QueryResult}
 		 *
-		 * @return bool
+		 * @return int
 		 */
-		public function set(string $path, bool $value): bool {
+		public function set(string $path, int $value): int {
 			return $this->data[$path] = $value;
 		}
 
@@ -27,11 +27,13 @@
 		}
 
 		/**
+		 * {@see QueryResult}
+		 *
 		 * @param string $path
 		 *
-		 * @return bool
+		 * @return int
 		 */
-		public function get(string $path): bool {
+		public function get(string $path): int {
 			if (!$this->has($path)) {
 				throw new \InvalidArgumentException($path . ' does not exist in the cache. Use ' . static::class .
 					'::has() to check first!');
