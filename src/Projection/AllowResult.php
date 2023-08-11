@@ -22,7 +22,7 @@
 		}
 
 		public static function isAllow(int $value): bool {
-			return $value & self::ALLOW !== 0;
+			return ($value & self::ALLOW) !== 0;
 		}
 
 		public static function isExplicitAllow(int $value): bool {
@@ -30,7 +30,7 @@
 		}
 
 		public static function isDeny(int $value): bool {
-			return $value & self::DENY !== 0;
+			return ($value & self::DENY) !== 0;
 		}
 
 		public static function isExplicitDeny(int $value): bool {
@@ -38,7 +38,7 @@
 		}
 
 		public static function isExplicit(int $value): bool {
-			return $value & self::IS_EXPLICIT !== 0;
+			return ($value & self::IS_EXPLICIT) !== 0;
 		}
 
 		public static function from(bool $allowed, bool $explicit): int {
