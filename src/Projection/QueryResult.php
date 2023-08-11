@@ -1,7 +1,7 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument\Projection;
 
-	final class AllowResult {
+	final class QueryResult {
 		/**
 		 * Indicates that the result was explicit, meaning that the projection didn't allow or deny the query by
 		 * default; that the queried path was one of the keys in the projection.

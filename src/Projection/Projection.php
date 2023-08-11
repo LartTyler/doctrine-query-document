@@ -57,7 +57,7 @@
 		}
 
 		/**
-		 * Queries the projection for the given path, returning an integer representation of the {@see AllowResult}
+		 * Queries the projection for the given path, returning an integer representation of the {@see QueryResult}
 		 * for the query.
 		 *
 		 * @param string $path
@@ -77,7 +77,7 @@
 				return true;
 
 			$parts = explode('.', $path);
-			$result = AllowResult::from($this->isAllowedByDefault(), false);
+			$result = QueryResult::from($this->isAllowedByDefault(), false);
 
 			foreach ($parts as $part) {
 				if (!isset($current[$part]))
@@ -86,7 +86,7 @@
 				$value = $current[$part];
 
 				if (!is_array($value)) {
-					$result = AllowResult::from($value, true);
+					$result = QueryResult::from($value, true);
 					break;
 				}
 
@@ -97,19 +97,19 @@
 		}
 
 		public function isAllowed(string $path, bool $useCache = true): bool {
-			return AllowResult::isAllow($this->query($path, $useCache));
+			return QueryResult::isAllow($this->query($path, $useCache));
 		}
 
 		public function isAllowedExplicitly(string $path, bool $useCache = true): bool {
-			return AllowResult::isExplicitAllow($this->query($path, $useCache));
+			return QueryResult::isExplicitAllow($this->query($path, $useCache));
 		}
 
 		public function isDenied(string $path, bool $useCache = true): bool {
-			return AllowResult::isDeny($this->query($path, $useCache));
+			return QueryResult::isDeny($this->query($path, $useCache));
 		}
 
 		public function isDeniedExplicitly(string $path, bool $useCache = true): bool {
-			return AllowResult::isExplicitDeny($this->query($path, $useCache));
+			return QueryResult::isExplicitDeny($this->query($path, $useCache));
 		}
 
 		/**

@@ -1,7 +1,7 @@
 <?php
 	namespace Projection;
 
-	use DaybreakStudios\DoctrineQueryDocument\Projection\AllowResult;
+	use DaybreakStudios\DoctrineQueryDocument\Projection\QueryResult;
 	use DaybreakStudios\DoctrineQueryDocument\Projection\Projection;
 	use PHPUnit\Framework\TestCase;
 
@@ -12,20 +12,20 @@
 			]);
 
 			$result = $projection->query('a.b.c');
-			$this->assertEquals(AllowResult::allow(true), $result, 'reports explicit allows');
+			$this->assertEquals(QueryResult::allow(true), $result, 'reports explicit allows');
 
 			$result = $projection->query('1.2.3');
-			$this->assertEquals(AllowResult::deny(), $result, 'reports implicit denies');
+			$this->assertEquals(QueryResult::deny(), $result, 'reports implicit denies');
 
 			$projection = Projection::fromFields([
 				'a.b.c' => false,
 			]);
 
 			$result = $projection->query('a.b.c');
-			$this->assertEquals(AllowResult::deny(true), $result, 'reports explicit denies');
+			$this->assertEquals(QueryResult::deny(true), $result, 'reports explicit denies');
 
 			$result = $projection->query('1.2.3');
-			$this->assertEquals(AllowResult::allow(), $result, 'reports implicit allows');
+			$this->assertEquals(QueryResult::allow(), $result, 'reports implicit allows');
 
 			$projection = Projection::fromFields([
 				'a.b' => true,
@@ -33,7 +33,7 @@
 
 			$result = $projection->query('a.b.c');
 			$this->assertEquals(
-				AllowResult::allow(true),
+				QueryResult::allow(true),
 				$result,
 				'explicit allows on parent nodes are inherited by child nodes',
 			);
@@ -44,7 +44,7 @@
 
 			$result = $projection->query('a.b.c');
 			$this->assertEquals(
-				AllowResult::deny(true),
+				QueryResult::deny(true),
 				$result,
 				'explict denys on parent nodes are inherited by child nodes',
 			);

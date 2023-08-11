@@ -9,7 +9,7 @@
 
 		/**
 		 * @param string $path
-		 * @param int   $value {@see AllowResult}
+		 * @param int   $value {@see QueryResult}
 		 *
 		 * @return int
 		 */
@@ -27,7 +27,7 @@
 		}
 
 		/**
-		 * {@see AllowResult}
+		 * {@see QueryResult}
 		 *
 		 * @param string $path
 		 *
