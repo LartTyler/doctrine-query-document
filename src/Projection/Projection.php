@@ -1,7 +1,7 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument\Projection;
 
-	class Projection {
+	class Projection implements ProjectionInterface {
 		/**
 		 * @var bool[]
 		 */
