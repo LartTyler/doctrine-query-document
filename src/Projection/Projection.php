@@ -26,6 +26,7 @@
 			$this->nodes = $nodes;
 			$this->cache = new ProjectionPathCache();
 
+			// For projections with no nodes, all paths are allowed
 			if (count($nodes) === 0)
 				$this->default = true;
 			else {
@@ -70,14 +71,13 @@
 			if ($useCache && $this->cache->has($path))
 				return $this->cache->get($path);
 
+			$result = QueryResult::from($this->isAllowedByDefault(), false);
 			$current = $this->getNodes();
 
-			// For projections with no nodes, all paths are allowed
 			if (!$current)
-				return true;
+				return $result;
 
 			$parts = explode('.', $path);
-			$result = QueryResult::from($this->isAllowedByDefault(), false);
 
 			foreach ($parts as $part) {
 				if (!isset($current[$part]))
