@@ -163,7 +163,10 @@
 		}
 
 		protected function getMatchAllValue(array $nodes): ?bool {
-			return isset($nodes[static::MATCH_ALL_SYMBOL]) ? (bool)$nodes[static::MATCH_ALL_SYMBOL] : null;
+			if (null !== $value = $nodes[static::MATCH_ALL_SYMBOL])
+				return (bool)$value;
+
+			return null;
 		}
 
 		/**
