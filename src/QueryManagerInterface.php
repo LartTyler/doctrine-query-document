@@ -21,21 +21,21 @@
 		 *
 		 * @return $this
 		 */
-		public function setOperators(array $operators);
+		public function setOperators(array $operators): static;
 
 		/**
 		 * @param OperatorInterface $operator
 		 *
 		 * @return $this
 		 */
-		public function setOperator(OperatorInterface $operator);
+		public function setOperator(OperatorInterface $operator): static;
 
 		/**
 		 * @param string $key
 		 *
 		 * @return $this
 		 */
-		public function removeOperator(string $key);
+		public function removeOperator(string $key): static;
 
 		/**
 		 * @param QueryBuilder $qb

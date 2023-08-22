@@ -1,7 +1,7 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
-	use Doctrine\ORM\Mapping\ClassMetadata;
+	use Doctrine\Persistence\Mapping\ClassMetadata;
 
 	interface ResolverInterface {
 		/**
@@ -15,34 +15,34 @@
 		/**
 		 * @param string[][] $mappedFields
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function setAllMappedFields(array $mappedFields);
+		public function setAllMappedFields(array $mappedFields): static;
 
 		/**
 		 * @param string   $class
 		 * @param string[] $mappedFields
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function setMappedFields(string $class, array $mappedFields);
+		public function setMappedFields(string $class, array $mappedFields): static;
 
 		/**
 		 * @param string $class
 		 * @param string $field
 		 * @param string $target
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function setMappedField(string $class, string $field, string $target);
+		public function setMappedField(string $class, string $field, string $target): static;
 
 		/**
 		 * @param string $class
 		 * @param string $field
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function removeMappedField(string $class, string $field);
+		public function removeMappedField(string $class, string $field): static;
 
 		/**
 		 * @param string $field

@@ -5,32 +5,28 @@
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownOperatorException;
 	use DaybreakStudios\DoctrineQueryDocument\QueryDocumentInterface;
 	use DaybreakStudios\DoctrineQueryDocument\ResolverContext;
-	use Doctrine\DBAL\Types\Type;
+	use Doctrine\DBAL\Types\Types;
 	use Doctrine\ORM\Query\Expr\Composite;
 	use Doctrine\ORM\Query\Expr\Func;
 
 	class SizeOperator extends AbstractOperator {
-		/**
-		 * SizeOperator constructor.
-		 */
 		public function __construct() {
 			parent::__construct('size');
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		protected function validate(string $field, $value): void {
+		protected function validate(string $field, mixed $value): void {
 			if (is_numeric($value) || is_array($value))
 				return;
 
 			throw new InvalidFieldValueException($field, 'number of a sub-document', $this->getKey());
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		protected function doProcess(QueryDocumentInterface $document, $field, $value, Composite $parent): void {
+		protected function doProcess(
+			QueryDocumentInterface $document,
+			object|string $field,
+			mixed $value,
+			Composite $parent,
+		): void {
 			if (!is_array($value))
 				$value = ['$eq' => $value];
 
@@ -38,7 +34,7 @@
 				$field,
 				[
 					ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID => false,
-				]
+				],
 			);
 
 			if (stripos($resolved, 'JSON_UNQUOTE(JSON_EXTRACT') === 0) {
@@ -55,7 +51,7 @@
 
 				$metadata = $document->getResolver()->getMetadata($alias);
 
-				if ($metadata->getTypeOfField($path) === Type::JSON)
+				if ($metadata->getTypeOfField($path) === Types::JSON)
 					$node = new Composite(['JSON_LENGTH(' . $resolved . ')']);
 			}
 
@@ -70,9 +66,9 @@
 							$field,
 							[
 								ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID => false,
-							]
+							],
 						),
-					]
+					],
 				);
 			}
 

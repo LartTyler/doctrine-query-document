@@ -6,17 +6,11 @@
 	use Doctrine\ORM\Query\Expr\Composite;
 
 	class GreaterThanOperator extends AbstractOperator {
-		/**
-		 * GreaterThanOperator constructor.
-		 */
 		public function __construct() {
 			parent::__construct('gt');
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		protected function validate(string $field, $value): void {
+		protected function validate(string $field, mixed $value): void {
 			if (is_numeric($value) || is_string($value))
 				return;
 
@@ -25,8 +19,8 @@
 
 		protected function doProcess(
 			QueryDocumentInterface $document,
-			$field,
-			$value,
+			object|string $field,
+			mixed $value,
 			Composite $parent
 		): void {
 			$document->expr()->gt($parent, $field, $value);

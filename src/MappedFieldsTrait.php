@@ -5,12 +5,14 @@
 		/**
 		 * @var string[][]
 		 */
-		protected $mappedFields = [];
+		protected array $mappedFields = [];
 
 		/**
-		 * {@inheritdoc}
+		 * @param string[][] $mappedFields
+		 *
+		 * @return $this
 		 */
-		public function setAllMappedFields(array $mappedFields) {
+		public function setAllMappedFields(array $mappedFields): static {
 			$this->mappedFields = [];
 
 			foreach ($mappedFields as $class => $fields)
@@ -19,36 +21,30 @@
 			return $this;
 		}
 
-		/**
-		 * @param string $class
-		 *
-		 * @return bool
-		 */
 		public function hasMappedFields(string $class): bool {
 			return isset($this->mappedFields[$class]);
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function getMappedField(string $class, string $field): ?string {
 			return $this->mappedFields[$class][$field] ?? null;
 		}
 
 		/**
-		 * {@inheritdoc}
+		 * @param string   $class
+		 * @param string[] $mappedFields
+		 *
+		 * @return static
 		 */
-		public function setMappedFields(string $class, array $mappedFields) {
+		public function setMappedFields(string $class, array $mappedFields): static {
 			$this->mappedFields[$class] = [];
 
 			foreach ($mappedFields as $field => $mappedField)
 				$this->setMappedField($class, $field, $mappedField);
+
+			return $this;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		public function setMappedField(string $class, string $field, string $target) {
+		public function setMappedField(string $class, string $field, string $target): static {
 			if (!isset($this->mappedFields[$class]))
 				$this->mappedFields[$class] = [];
 
@@ -57,10 +53,7 @@
 			return $this;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		public function removeMappedField(string $class, string $field) {
+		public function removeMappedField(string $class, string $field): static {
 			if (!isset($this->mappedFields[$class]))
 				return $this;
 

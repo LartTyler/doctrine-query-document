@@ -97,7 +97,7 @@
 					->will(
 						$this->returnCallback(
 							function(string $field) use ($key) {
-								return isset($this->mockedClassMetadataFields[$key]);
+								return isset($this->mockedClassMetadataFields[$key][$field]);
 							}
 						)
 					);
@@ -107,7 +107,7 @@
 					->will(
 						$this->returnCallback(
 							function(string $field) use ($key) {
-								return $this->mockedClassMetadataFields[$field];
+								return $this->mockedClassMetadataFields[$key][$field];
 							}
 						)
 					);

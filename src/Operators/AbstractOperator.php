@@ -6,35 +6,19 @@
 	use Doctrine\ORM\Query\Expr\Composite;
 
 	abstract class AbstractOperator implements OperatorInterface {
-		/**
-		 * @var string
-		 */
-		protected $key;
+		public function __construct(
+			protected string $key,
+		) {}
 
-		/**
-		 * AbstractOperator constructor.
-		 *
-		 * @param string $key
-		 */
-		public function __construct(string $key) {
-			$this->key = $key;
-		}
-
-		/**
-		 * {@inheritdoc}
-		 */
 		public function getKey(): string {
 			return $this->key;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function process(
 			QueryDocumentInterface $document,
-			$field,
-			$value,
-			Composite $parent
+			object|string $field,
+			mixed $value,
+			Composite $parent,
 		): void {
 			$this->validate($field, $value);
 			$this->doProcess($document, $field, $value, $parent);
@@ -47,20 +31,12 @@
 		 * @return void
 		 * @throws \RuntimeException if the key and / or value do not pass validation
 		 */
-		protected abstract function validate(string $field, $value): void;
+		protected abstract function validate(string $field, mixed $value): void;
 
-		/**
-		 * @param QueryDocumentInterface $document
-		 * @param string|object          $field
-		 * @param mixed                  $value
-		 * @param Composite              $parent
-		 *
-		 * @return void
-		 */
 		protected abstract function doProcess(
 			QueryDocumentInterface $document,
-			$field,
-			$value,
-			Composite $parent
+			string|object $field,
+			mixed $value,
+			Composite $parent,
 		): void;
 	}

@@ -5,37 +5,33 @@
 	use DaybreakStudios\DoctrineQueryDocument\Exception\QueryException;
 	use DaybreakStudios\DoctrineQueryDocument\QueryDocumentInterface;
 	use DaybreakStudios\DoctrineQueryDocument\ResolverContext;
-	use Doctrine\DBAL\Types\Type;
+	use Doctrine\DBAL\Types\Types;
 	use Doctrine\ORM\Query\Expr\Composite;
 
 	class NotContainsOperator extends AbstractOperator {
-		/**
-		 * NotContainsOperator constructor.
-		 */
 		public function __construct() {
 			parent::__construct('ncontains');
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		protected function validate(string $field, $value): void {
+		protected function validate(string $field, mixed $value): void {
 			if (is_scalar($value))
 				return;
 
 			throw new InvalidFieldValueException($field, 'scalar', $this->getKey());
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		protected function doProcess(QueryDocumentInterface $document, $field, $value, Composite $parent): void {
+		protected function doProcess(
+			QueryDocumentInterface $document,
+			object|string $field,
+			mixed $value,
+			Composite $parent,
+		): void {
 			$resolved = $document->getResolver()->resolve(
 				$field,
 				[
 					ResolverContext::RESOLVE_ASSOCIATIONS_TO_ID => false,
 					ResolverContext::RESOLVE_EMBEDDED_JSON_TO_EXTRACT_FUNC => false,
-				]
+				],
 			);
 
 			$alias = strtok($resolved, '.');
@@ -49,28 +45,28 @@
 						$alias,
 						$targetField,
 						$document->expr()->addParameter($value),
-						$jsonPath
-					)
+						$jsonPath,
+					),
 				);
-			} else if ($document->getResolver()->getMetadata($alias)->getTypeOfField($targetField) === Type::JSON) {
+			} else if ($document->getResolver()->getMetadata($alias)->getTypeOfField($targetField) === Types::JSON) {
 				$parent->add(
 					sprintf(
 						'NOT JSON_CONTAINS(%s, %s)',
 						$resolved,
-						$document->expr()->addParameter($value)
-					)
+						$document->expr()->addParameter($value),
+					),
 				);
 			} else if ($document->getResolver()->getMetadata($alias)->isCollectionValuedAssociation($targetField)) {
 				$parent->add(
 					sprintf(
 						'%s NOT MEMBER OF %s',
 						$document->expr()->addParameter($value),
-						$resolved
-					)
+						$resolved,
+					),
 				);
 			} else {
 				throw new QueryException(
-					'The `$ncontains` operator can only be used on JSON or a collection valued association'
+					'The `$ncontains` operator can only be used on JSON or a collection valued association',
 				);
 			}
 		}

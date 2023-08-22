@@ -11,7 +11,7 @@
 		}
 	],
 	"require": {
-		"php": ">=7.3",
+		"php": ">=8.0",
 		"doctrine/orm": "^2.6"
 	},
 	"require-dev": {
@@ -29,5 +29,8 @@
 		"psr-4": {
 			"": "tests/"
 		}
+	},
+	"scripts": {
+		"test": "phpunit"
 	}
 }

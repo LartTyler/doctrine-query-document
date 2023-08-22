@@ -1,4 +1,4 @@
-FROM php:7.3
+FROM php:8.0
 
 RUN apt-get update -y && \
 	apt-get install -y unzip wget

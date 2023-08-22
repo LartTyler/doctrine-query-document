@@ -3,6 +3,7 @@
 
 	use DaybreakStudios\DoctrineQueryDocument\QueryManager;
 	use Doctrine\DBAL\Types\Type;
+	use Doctrine\DBAL\Types\Types;
 	use Doctrine\ORM\EntityManager;
 	use Doctrine\ORM\Mapping\ClassMetadata;
 	use Doctrine\ORM\QueryBuilder;
@@ -44,8 +45,8 @@
 						[
 							['Entity', $rootMetadata],
 							['Related', $relatedMetadata],
-						]
-					)
+						],
+					),
 				);
 
 			$qm = new QueryManager($em);
@@ -81,7 +82,7 @@
 			$rootMetadata->expects($this->any())
 				->method('getTypeOfField')
 				->with('json')
-				->willReturn(Type::JSON);
+				->willReturn(Types::JSON);
 
 			$em->expects($this->any())
 				->method('getClassMetadata')
@@ -95,7 +96,7 @@
 					'json' => [
 						'$ncontains' => 1,
 					],
-				]
+				],
 			);
 
 			$this->assertEquals('SELECT e FROM Entity e WHERE NOT JSON_CONTAINS(e.json, ?0)', $qb->getDQL());
@@ -106,10 +107,13 @@
 					'json.nested' => [
 						'$ncontains' => 1,
 					],
-				]
+				],
 			);
 
-			$this->assertEquals('SELECT e FROM Entity e WHERE NOT JSON_CONTAINS(e.json, ?0, "$.nested")', $qb->getDQL());
+			$this->assertEquals(
+				'SELECT e FROM Entity e WHERE NOT JSON_CONTAINS(e.json, ?0, "$.nested")',
+				$qb->getDQL(),
+			);
 		}
 
 		/**
