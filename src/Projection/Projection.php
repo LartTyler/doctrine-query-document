@@ -22,13 +22,14 @@
 		 *
 		 * @param bool[] $nodes
 		 */
-		protected function __construct(array $nodes) {
+		public function __construct(array $nodes, bool $default = null) {
 			$this->nodes = $nodes;
 			$this->cache = new ProjectionPathCache();
 
-			// For projections with no nodes, all paths are allowed
-			if (count($nodes) === 0)
-				$this->default = true;
+			if ($default !== null)
+				$this->default = $default;
+			else if (count($nodes) === 0)
+				$this->default = true; // For projections with no nodes, all paths are allowed
 			else {
 				// If an element is not matched, the default behavior is the opposite of the value of the first element.
 				// For example, for an include projection, any element not found in $nodes should be rejected (the
@@ -144,12 +145,13 @@
 		}
 
 		/**
-		 * @param array $fields
+		 * @param array     $fields
+		 * @param bool|null $default
 		 *
 		 * @return static
 		 */
-		public static function fromFields(array $fields) {
-			return new static(static::toNodes($fields));
+		public static function fromFields(array $fields, bool $default = null) {
+			return new static(static::toNodes($fields), $default);
 		}
 
 		/**
