@@ -3,6 +3,11 @@
 
 	final class QueryResult {
 		/**
+		 * Indicates that the query result has not yet been set.
+		 */
+		public const EMPTY = 0;
+
+		/**
 		 * Indicates that the result was explicit, meaning that the projection didn't allow or deny the query by
 		 * default; that the queried path was one of the keys in the projection.
 		 */
@@ -12,6 +17,10 @@
 		public const DENY = 4;
 
 		private function __construct() {}
+
+		public static function empty(): int {
+			return self::EMPTY;
+		}
 
 		public static function allow(bool $explicit = false): int {
 			return self::ALLOW | (self::IS_EXPLICIT * (int)$explicit);
@@ -39,6 +48,10 @@
 
 		public static function isExplicit(int $value): bool {
 			return ($value & self::IS_EXPLICIT) !== 0;
+		}
+
+		public static function isEmpty(int $value): bool {
+			return $value === self::EMPTY;
 		}
 
 		public static function from(bool $allowed, bool $explicit): int {

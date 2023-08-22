@@ -72,26 +72,40 @@
 			if ($useCache && $this->cache->has($path))
 				return $this->cache->get($path);
 
-			$result = QueryResult::from($this->isAllowedByDefault(), false);
 			$current = $this->getNodes();
 
 			if (!$current)
-				return $result;
+				return $this->getDefaultResult();
 
+			$result = QueryResult::empty();
 			$parts = explode('.', $path);
 
 			foreach ($parts as $part) {
-				if (!isset($current[$part]))
-					break;
+				if (!isset($current[$part])) {
+					if (null !== $allValue = $this->getMatchAllValue($current))
+						$result = QueryResult::from($allValue, true);
+					else
+						$result = $this->getDefaultResult();
 
-				$value = $current[$part];
-
-				if (!is_array($value)) {
-					$result = QueryResult::from($value, true);
 					break;
 				}
 
-				$current = $value;
+				$current = $current[$part];
+
+				if (!is_array($current)) {
+					$result = QueryResult::from($current, true);
+					break;
+				}
+			}
+
+			// If the loop ended with an empty result, the query was for an ancestor of a path contained in the list if
+			// $current is still an array. If it isn't an array, then we should fall back on the default match behavior
+			// for the projection.
+			if (QueryResult::isEmpty($result)) {
+				if (is_array($current))
+					$result = QueryResult::allow();
+				else
+					$result = $this->getDefaultResult();
 			}
 
 			return $this->cache->set($path, $result);
@@ -142,6 +156,14 @@
 			}
 
 			return $output;
+		}
+
+		protected function getDefaultResult(): int {
+			return QueryResult::from($this->isAllowedByDefault(), false);
+		}
+
+		protected function getMatchAllValue(array $nodes): ?bool {
+			return isset($nodes[static::MATCH_ALL_SYMBOL]) ? (bool)$nodes[static::MATCH_ALL_SYMBOL] : null;
 		}
 
 		/**
