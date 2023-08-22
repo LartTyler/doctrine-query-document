@@ -57,4 +57,14 @@
 		public static function from(bool $allowed, bool $explicit): int {
 			return $allowed ? self::allow($explicit) : self::deny($explicit);
 		}
+
+		public static function describe(int $value): string {
+			if (self::isEmpty($value))
+				return 'empty';
+
+			$output = self::isExplicit($value) ? 'explicit ' : '';
+			$output .= self::isAllow($value) ? 'allow' : 'deny';
+
+			return $output;
+		}
 	}
