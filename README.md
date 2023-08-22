@@ -132,6 +132,8 @@ This library ships with a handy utility class that allows you to easily apply pr
 
 ```php
 <?php
+    use DaybreakStudios\DoctrineQueryDocument\Projection\Projection;
+
     // $objectManager should be an instance of Doctrine\Common\Persistence\ObjectManager
     
     $manager = new QueryManager($objectManager);
@@ -175,10 +177,15 @@ This library ships with a handy utility class that allows you to easily apply pr
     // [{"id": 1, "field": "value", "otherEntity": {"id": 1, "someField": "value"}}, ...]
 ```
 
-Projections can also be inverted by supplying `false` as the value of each node in the constructor argument.
+Projections can also be inverted by supplying `false` as the value of each node in the constructor argument. If you want
+to explicitly control the default matching behavior, you can also provide the optional `$default` argument to the
+constructor. Otherwise, default matching behavior will be inferred from the first element of the projection: allow if
+the first element is `false` (the projection is a deny-list), or deny if the first element is `true` (the projection is
+an allow-list).
 
 There's also a static convenience method on `Projection` that allows you to build the projection object from a flat
-object of string paths, like so.
+object of string paths, like so. Like the constructor, you can also pass a second `$default` argument to explicitly set
+the default matching behavior of the projection.
 
 ```php
 <?php
@@ -189,14 +196,80 @@ object of string paths, like so.
     	'otherEntity.someField' => true,
     ];
     
-    // set up QueryManager
-    
     $projection = Projection::fromFields($input);
 ```
 
 In the above example, the resulting `Projection` object would be the same as the one in the original example. In some
 cases, it may be more convenient to supply a flat map of paths, instead of a potentially deep array of paths (i.e. when
 the projected fields are coming in from an API input).
+
+You can also use the match-all operator "*" to control matching behavior for all fields in a group.
+
+```php
+<?php
+    $input = [
+        'child.*' => false,
+        'child.id' => true,
+        'child.name' => true,
+    ];
+
+    $projection = Projection::fromFields($input);
+
+    assert($projection->isAllowed('someParentField'));
+    assert($projection->isAllowed('child'));
+    assert($projection->isAllowed('child.id'));
+    assert($projection->isAllowed('child.name'));
+    assert($projection->isDenied('child.foo'));
+```
+
+Projections can also differentiate between default or explicit allow/deny behavior. For example, consider the following
+projection.
+
+```php
+<?php
+    $projection = new Projection([
+        'id' => true,
+        'name' => false,
+    ], true);
+
+    // Both are the "explicit" variants of their respective behavior, since the keys are present in the list.
+    assert($projection->isAllowedExplicitly('id'));
+    assert($projection->isDeniedExplicitly('name'));
+    
+    // The Projection is configured to allow by default (the second constructor argument), so fields not present in the
+    // list are allowed.
+    assert($projection->isAllowed('foo'));
+
+    // However, the default allow behavior is not an explicit allow, as the key is _not_ in the list.
+    assert(!$projection->isAllowedExplicitly('foo'));
+```
+
+This can be useful if you have a field that is expensive to compute or serialize, and you _only_ want to include if the
+projection specifically calls for it to be included.
+
+You can also directly inspect the underlying value that projections use to repesent results using the
+`Projection::query()` method, which returns an integer value that describes that result. Additionally, the
+`QueryResult::describe()` method can be used to get a plain-english representation of a result for debugging or logging
+purposes.
+
+```php
+<?php
+    use DaybreakStudios\DoctrineQueryDocument\Projection\QueryResult;
+
+    $projection = new Projection([
+        'id' => true,
+    ]);
+
+    $result = $projection->query('id');
+    
+    assert($result === QueryResult::allow(true));
+    assert(QueryResult::isAllow($result));
+    assert(QueryResult::isExplicit($result))
+    assert(QueryResult::isExplicitAllow($result));
+
+    echo QueryResult::describe($result); // "explicit allow"
+    echo QueryResult::describe($projection->query('foo')); // "deny"
+```
 
 # Custom Operators
 You can add custom operator classes by implementing `DaybreakStudios\DoctrineQueryDocument\OperatorInterface`, or by
