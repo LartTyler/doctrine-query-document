@@ -5,7 +5,7 @@
 		/**
 		 * @var array<string, int>
 		 */
-		protected $data = [];
+		protected array $data = [];
 
 		/**
 		 * @param string $path

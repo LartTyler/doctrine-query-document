@@ -1,48 +1,48 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
+	/**
+	 * @template T
+	 */
 	class LinkedList {
 		/**
-		 * @var mixed
+		 * @var T
 		 */
-		protected $value;
+		protected mixed $value;
 
 		/**
-		 * @var LinkedList|null
+		 * @var LinkedList<T>|null
 		 */
-		protected $next;
+		protected ?LinkedList $next = null;
 
 		/**
-		 * LinkedList constructor.
-		 *
-		 * @param mixed      $value
+		 * @param T $value
 		 */
-		public function __construct($value) {
+		public function __construct(mixed $value) {
 			$this->value = $value;
 		}
 
 		/**
-		 * @return mixed
+		 * @return T
 		 */
-		public function getValue() {
+		public function getValue(): mixed {
 			return $this->value;
 		}
 
 		/**
-		 * @return LinkedList|null
+		 * @return LinkedList<T>|null
 		 */
 		public function getNext(): ?LinkedList {
 			return $this->next;
 		}
 
 		/**
-		 * @param LinkedList|null $next
+		 * @param LinkedList<T>|null $next
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function setNext(?LinkedList $next) {
+		public function setNext(?LinkedList $next): static {
 			$this->next = $next;
-
 			return $this;
 		}
 
@@ -51,12 +51,12 @@
 		 * longer than the length of the list, all following elements will be removed prior to injecting the provided
 		 * list.
 		 *
-		 * @param LinkedList $list
-		 * @param int        $length
+		 * @param LinkedList<T> $list
+		 * @param int           $length
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function splice(LinkedList $list, $length = 0) {
+		public function splice(LinkedList $list, int $length = 0): static {
 			if ($this->getNext() && $length > 0) {
 				for ($i = 0; $i < $length; $i++) {
 					$next = $this->getNext()->getNext();
@@ -76,11 +76,11 @@
 		}
 
 		/**
-		 * @param LinkedList $list
+		 * @param LinkedList<T> $list
 		 *
-		 * @return $this
+		 * @return static
 		 */
-		public function inject(LinkedList $list) {
+		public function inject(LinkedList $list): static {
 			$this->value = $list->getValue();
 
 			// If the current node has no next item, we can blindly call setNext() and stop processing early
@@ -104,7 +104,7 @@
 		}
 
 		/**
-		 * @return mixed[]
+		 * @return T[]
 		 */
 		public function all(): array {
 			$node = $this;
@@ -118,11 +118,11 @@
 		}
 
 		/**
-		 * @param array $items
+		 * @param T[] $items
 		 *
 		 * @return static
 		 */
-		public static function fromArray(array $items) {
+		public static function fromArray(array $items): static {
 			if (!$items)
 				throw new \InvalidArgumentException('Cannot create list from an empty array');
 

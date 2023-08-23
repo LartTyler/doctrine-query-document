@@ -9,98 +9,38 @@
 	use Doctrine\Persistence\ObjectManager;
 
 	class QueryDocument implements QueryDocumentInterface {
-		/**
-		 * @var QueryManagerInterface
-		 */
-		protected $queryManager;
+		protected ResolverInterface $resolver;
+		protected Composite $rootComposite;
+		protected Expr $expr;
+		protected int $processDepth = 0;
+		protected bool $applied = false;
 
-		/**
-		 * @var ObjectManager
-		 */
-		protected $objectManager;
-
-		/**
-		 * @var QueryBuilder
-		 */
-		protected $queryBuilder;
-
-		/**
-		 * @var ResolverInterface
-		 */
-		protected $resolver;
-
-		/**
-		 * @var Composite
-		 */
-		protected $rootComposite;
-
-		/**
-		 * @var Expr
-		 */
-		protected $expr;
-
-		/**
-		 * @var int
-		 */
-		protected $processDepth = 0;
-
-		/**
-		 * @var bool
-		 */
-		protected $applied = false;
-
-		/**
-		 * QueryDocument constructor.
-		 *
-		 * @param QueryManagerInterface $queryManager
-		 * @param ObjectManager         $objectManager
-		 * @param QueryBuilder          $queryBuilder
-		 */
 		public function __construct(
-			QueryManagerInterface $queryManager,
-			ObjectManager $objectManager,
-			QueryBuilder $queryBuilder
+			protected QueryManagerInterface $queryManager,
+			protected ObjectManager $objectManager,
+			protected QueryBuilder $queryBuilder,
 		) {
-			$this->queryManager = $queryManager;
-			$this->objectManager = $objectManager;
-			$this->queryBuilder = $queryBuilder;
-
 			$this->resolver = new Resolver($objectManager, $queryBuilder);
 			$this->rootComposite = new Andx();
 			$this->expr = new Expr($queryBuilder, $this->resolver, $this->rootComposite);
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function getQueryManager(): QueryManagerInterface {
 			return $this->queryManager;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function getResolver(): ResolverInterface {
 			return $this->resolver;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function expr(): Expr {
 			return $this->expr;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function isApplied(): bool {
 			return $this->applied;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function process(array $query, Composite $parent = null): void {
 			if ($this->isApplied())
 				throw new DocumentAlreadyAppliedException();
@@ -110,7 +50,7 @@
 			$parent = $parent ?? $this->rootComposite;
 
 			foreach ($query as $key => $value) {
-				if (strpos($key, '$') === 0)
+				if (str_starts_with($key, '$'))
 					$this->invokeOperator($parent, $key, $key, $value);
 				else {
 					if (is_array($value)) {
@@ -125,16 +65,8 @@
 				$this->applied = true;
 		}
 
-		/**
-		 * @param Composite $parent
-		 * @param string    $operatorKey
-		 * @param string    $field
-		 * @param mixed     $value
-		 *
-		 * @return void
-		 */
-		protected function invokeOperator(Composite $parent, string $operatorKey, string $field, $value): void {
-			if (strpos($operatorKey, '$') !== 0)
+		protected function invokeOperator(Composite $parent, string $operatorKey, string $field, mixed $value): void {
+			if (!str_starts_with($operatorKey, '$'))
 				throw new \InvalidArgumentException('Invalid key in filter document for ' . $operatorKey);
 
 			$operator = $this->getQueryManager()->getOperator($operatorKey);

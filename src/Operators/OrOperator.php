@@ -12,24 +12,18 @@
 			parent::__construct('or');
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		protected function validate(string $field, $value): void {
+		protected function validate(string $field, mixed $value): void {
 			if (is_array($value))
 				return;
 
 			throw new InvalidFieldValueException($field, 'array', $this->getKey());
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		protected function doProcess(
 			QueryDocumentInterface $document,
-			$field,
-			$value,
-			Composite $parent
+			object|string $field,
+			mixed $value,
+			Composite $parent,
 		): void {
 			$orX = new Orx();
 

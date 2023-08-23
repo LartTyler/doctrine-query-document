@@ -17,5 +17,10 @@
 		 *
 		 * @return void
 		 */
-		public function process(QueryDocumentInterface $document, $field, $value, Composite $parent): void;
+		public function process(
+			QueryDocumentInterface $document,
+			object|string $field,
+			mixed $value,
+			Composite $parent,
+		): void;
 	}

@@ -1,7 +1,6 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument;
 
-	use DaybreakStudios\DoctrineQueryDocument\Operators;
 	use Doctrine\ORM\QueryBuilder;
 	use Doctrine\Persistence\ObjectManager;
 
@@ -28,25 +27,15 @@
 		];
 
 		/**
-		 * @var ObjectManager
-		 */
-		protected $objectManager;
-
-		/**
 		 * @var OperatorInterface[]
 		 */
-		protected $operators;
+		protected array $operators;
 
-		/**
-		 * QueryManager constructor.
-		 *
-		 * @param ObjectManager $objectManager
-		 * @param array         $operators
-		 * @param bool          $useBuiltin
-		 */
-		public function __construct(ObjectManager $objectManager, array $operators = [], bool $useBuiltin = true) {
-			$this->objectManager = $objectManager;
-
+		public function __construct(
+			protected ObjectManager $objectManager,
+			array $operators = [],
+			bool $useBuiltin = true,
+		) {
 			if ($operators)
 				$this->setOperators($operators);
 
@@ -56,17 +45,11 @@
 			}
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function getOperators(): array {
 			return $this->operators;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		public function setOperators(array $operators) {
+		public function setOperators(array $operators): static {
 			$this->operators = [];
 
 			foreach ($operators as $operator)
@@ -75,11 +58,8 @@
 			return $this;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function getOperator(string $key): ?OperatorInterface {
-			if (strpos($key, '$') === 0)
+			if (str_starts_with($key, '$'))
 				$key = substr($key, 1);
 
 			if (isset($this->operators[$key]))
@@ -88,20 +68,13 @@
 			return null;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		public function setOperator(OperatorInterface $operator) {
+		public function setOperator(OperatorInterface $operator): static {
 			$this->operators[$operator->getKey()] = $operator;
-
 			return $this;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
-		public function removeOperator(string $key) {
-			if (strpos($key, '$') === 0)
+		public function removeOperator(string $key): static {
+			if (str_starts_with($key, '$'))
 				$key = substr($key, 1);
 
 			unset($this->operators[$key]);
@@ -109,9 +82,6 @@
 			return $this;
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function create(QueryBuilder $qb): QueryDocumentInterface {
 			$document = new QueryDocument($this, $this->objectManager, $qb);
 			$document->getResolver()->setAllMappedFields($this->mappedFields);
@@ -119,10 +89,6 @@
 			return $document;
 		}
 
-		/**
-		 * @param QueryBuilder $qb
-		 * @param array        $query
-		 */
 		public function apply(QueryBuilder $qb, array $query): void {
 			$this->create($qb)->process($query);
 		}

@@ -2,20 +2,10 @@
 	namespace DaybreakStudios\DoctrineQueryDocument\Projection;
 
 	class PrefixedProjection implements ProjectionInterface {
-		/**
-		 * @var ProjectionInterface
-		 */
-		protected $projection;
-
-		/**
-		 * @var string
-		 */
-		protected $prefix;
-
-		public function __construct(ProjectionInterface $projection, string $prefix) {
-			$this->projection = $projection;
-			$this->prefix = $prefix;
-		}
+		public function __construct(
+			protected ProjectionInterface $projection,
+			protected string $prefix,
+		) {}
 
 		public function query(string $path, bool $useCache = true): int {
 			return $this->projection->query($this->addPrefix($path), $useCache);

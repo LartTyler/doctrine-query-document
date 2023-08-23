@@ -5,22 +5,23 @@
 		/**
 		 * @var bool[]
 		 */
-		protected $nodes;
+		protected array $nodes;
 
 		/**
 		 * @var bool
 		 */
-		protected $default;
+		protected bool $default;
 
 		/**
 		 * @var ProjectionPathCache
 		 */
-		protected $cache;
+		protected ProjectionPathCache $cache;
 
 		/**
 		 * Projection constructor.
 		 *
-		 * @param bool[] $nodes
+		 * @param array     $nodes
+		 * @param bool|null $default
 		 */
 		public function __construct(array $nodes, bool $default = null) {
 			$this->nodes = $nodes;
@@ -163,7 +164,7 @@
 		}
 
 		protected function getMatchAllValue(array $nodes): ?bool {
-			if (null !== $value = $nodes[static::MATCH_ALL_SYMBOL])
+			if (null !== $value = $nodes[static::MATCH_ALL_SYMBOL] ?? null)
 				return (bool)$value;
 
 			return null;
@@ -175,7 +176,7 @@
 		 *
 		 * @return static
 		 */
-		public static function fromFields(array $fields, bool $default = null) {
+		public static function fromFields(array $fields, bool $default = null): static {
 			return new static(static::toNodes($fields), $default);
 		}
 

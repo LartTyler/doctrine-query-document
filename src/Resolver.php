@@ -3,47 +3,27 @@
 
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownFieldException;
 	use Doctrine\DBAL\Types\Types;
-	use Doctrine\ORM\Mapping\ClassMetadata;
 	use Doctrine\ORM\QueryBuilder;
+	use Doctrine\Persistence\Mapping\ClassMetadata;
 	use Doctrine\Persistence\ObjectManager;
 
 	class Resolver implements ResolverInterface {
 		use MappedFieldsTrait;
 
-		/**
-		 * @var ObjectManager
-		 */
-		protected $manager;
-
-		/**
-		 * @var QueryBuilder
-		 */
-		protected $qb;
-
-		/**
-		 * @var ClassMetadata
-		 */
-		protected $rootMetadata;
-
-		/**
-		 * @var string
-		 */
-		protected $rootAlias;
+		protected ClassMetadata $rootMetadata;
+		protected string $rootAlias;
 
 		/**
 		 * @var string[]
 		 */
-		protected $joins = [];
+		protected array $joins = [];
 
-		/**
-		 * @var array
-		 */
-		protected $resolveCache = [];
+		protected array $resolveCache = [];
 
 		/**
 		 * @var ClassMetadata[]
 		 */
-		protected $loadedMetadata = [];
+		protected array $loadedMetadata = [];
 
 		/**
 		 * Resolver constructor.
@@ -52,10 +32,11 @@
 		 * @param QueryBuilder  $qb
 		 * @param string[][]    $mappedFields
 		 */
-		public function __construct(ObjectManager $manager, QueryBuilder $qb, array $mappedFields = []) {
-			$this->manager = $manager;
-			$this->qb = $qb;
-
+		public function __construct(
+			protected ObjectManager $manager,
+			protected QueryBuilder $qb,
+			array $mappedFields = [],
+		) {
 			$this->rootMetadata = $manager->getClassMetadata($qb->getRootEntities()[0]);
 			$this->rootAlias = $qb->getRootAliases()[0];
 
@@ -63,9 +44,6 @@
 				$this->setMappedFields($class, $fields);
 		}
 
-		/**
-		 * {@inheritdoc}
-		 */
 		public function resolve(string $field, array $context = []): string {
 			if (isset($this->resolveCache[$field]))
 				return $this->resolveCache[$field];
@@ -148,21 +126,10 @@
 			return $this->resolveCache[$field] = $resolved;
 		}
 
-		/**
-		 * @param string $alias
-		 *
-		 * @return ClassMetadata|null
-		 */
 		public function getMetadata(string $alias): ?ClassMetadata {
 			return $this->loadedMetadata[$alias] ?? null;
 		}
 
-		/**
-		 * @param string $parentAlias
-		 * @param string $parentField
-		 *
-		 * @return string
-		 */
 		protected function getJoinAlias(string $parentAlias, string $parentField): string {
 			$joinKey = $parentAlias . '.' . $parentField;
 
@@ -176,12 +143,6 @@
 			return $this->joins[$joinKey] = $alias;
 		}
 
-		/**
-		 * @param string     $class
-		 * @param LinkedList $current
-		 *
-		 * @return array|null
-		 */
 		protected function findReverseMappedNode(string $class, LinkedList $current): ?array {
 			if (!$current->getNext() || !$this->hasMappedFields($class))
 				return null;
