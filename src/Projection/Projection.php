@@ -22,13 +22,14 @@
 		 *
 		 * @param bool[] $nodes
 		 */
-		protected function __construct(array $nodes) {
+		public function __construct(array $nodes, bool $default = null) {
 			$this->nodes = $nodes;
 			$this->cache = new ProjectionPathCache();
 
-			// For projections with no nodes, all paths are allowed
-			if (count($nodes) === 0)
-				$this->default = true;
+			if ($default !== null)
+				$this->default = $default;
+			else if (count($nodes) === 0)
+				$this->default = true; // For projections with no nodes, all paths are allowed
 			else {
 				// If an element is not matched, the default behavior is the opposite of the value of the first element.
 				// For example, for an include projection, any element not found in $nodes should be rejected (the
@@ -71,26 +72,40 @@
 			if ($useCache && $this->cache->has($path))
 				return $this->cache->get($path);
 
-			$result = QueryResult::from($this->isAllowedByDefault(), false);
 			$current = $this->getNodes();
 
 			if (!$current)
-				return $result;
+				return $this->getDefaultResult();
 
+			$result = QueryResult::empty();
 			$parts = explode('.', $path);
 
 			foreach ($parts as $part) {
-				if (!isset($current[$part]))
-					break;
+				if (!isset($current[$part])) {
+					if (null !== $allValue = $this->getMatchAllValue($current))
+						$result = QueryResult::from($allValue, true);
+					else
+						$result = $this->getDefaultResult();
 
-				$value = $current[$part];
-
-				if (!is_array($value)) {
-					$result = QueryResult::from($value, true);
 					break;
 				}
 
-				$current = $value;
+				$current = $current[$part];
+
+				if (!is_array($current)) {
+					$result = QueryResult::from($current, true);
+					break;
+				}
+			}
+
+			// If the loop ended with an empty result, the query was for an ancestor of a path contained in the list if
+			// $current is still an array. If it isn't an array, then we should fall back on the default match behavior
+			// for the projection.
+			if (QueryResult::isEmpty($result)) {
+				if (is_array($current))
+					$result = QueryResult::allow();
+				else
+					$result = $this->getDefaultResult();
 			}
 
 			return $this->cache->set($path, $result);
@@ -143,13 +158,25 @@
 			return $output;
 		}
 
+		protected function getDefaultResult(): int {
+			return QueryResult::from($this->isAllowedByDefault(), false);
+		}
+
+		protected function getMatchAllValue(array $nodes): ?bool {
+			if (null !== $value = $nodes[static::MATCH_ALL_SYMBOL])
+				return (bool)$value;
+
+			return null;
+		}
+
 		/**
-		 * @param array $fields
+		 * @param array     $fields
+		 * @param bool|null $default
 		 *
 		 * @return static
 		 */
-		public static function fromFields(array $fields) {
-			return new static(static::toNodes($fields));
+		public static function fromFields(array $fields, bool $default = null) {
+			return new static(static::toNodes($fields), $default);
 		}
 
 		/**

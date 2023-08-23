@@ -11,6 +11,8 @@
 	 * be well-documented that the `$useCache` argument has no effect.
 	 */
 	interface ProjectionInterface {
+		public const MATCH_ALL_SYMBOL = '*';
+
 		/**
 		 * Returns an integer representing the result of the query.
 		 *

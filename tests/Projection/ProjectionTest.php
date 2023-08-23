@@ -208,4 +208,43 @@
 				'removes matched keys from deny-list',
 			);
 		}
+
+		public function testAllowedChildNode() {
+			$projection = Projection::fromFields(
+				[
+					'child.field' => true,
+				],
+				false,
+			);
+
+			$this->assertTrue($projection->isAllowed('child'));
+			$this->assertFalse($projection->isAllowedExplicitly('child'));
+			$this->assertTrue($projection->isAllowedExplicitly('child.field'));
+			$this->assertFalse($projection->isAllowed('child.bar'));
+
+			$projection = Projection::fromFields(
+				[
+					'child' => true,
+				],
+				false,
+			);
+
+			$this->assertTrue($projection->isAllowedExplicitly('child'));
+			$this->assertTrue($projection->isAllowedExplicitly('child.field'));
+			$this->assertFalse($projection->isAllowed('bar'));
+		}
+
+		public function testMatchAllFallback() {
+			$projection = Projection::fromFields(
+				[
+					'child.*' => false,
+					'child.foo' => true,
+				],
+				true
+			);
+
+			$this->assertFalse($projection->isAllowed('child.bar'));
+			$this->assertTrue($projection->isDeniedExplicitly('child.bar'));
+			$this->assertTrue($projection->isAllowedExplicitly('child.foo'));
+		}
 	}
