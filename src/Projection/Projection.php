@@ -1,7 +1,7 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument\Projection;
 
-	class Projection implements ProjectionInterface {
+	class Projection implements ProjectionInterface, PrefixableProjectionInterface {
 		/**
 		 * @var bool[]
 		 */
@@ -157,6 +157,10 @@
 			}
 
 			return $output;
+		}
+
+		public function withPrefix(string $prefix): ProjectionInterface {
+			return new PrefixedProjection($this, $prefix);
 		}
 
 		protected function getDefaultResult(): int {

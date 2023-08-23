@@ -1,7 +1,7 @@
 <?php
 	namespace DaybreakStudios\DoctrineQueryDocument\Projection;
 
-	class PrefixedProjection implements ProjectionInterface {
+	class PrefixedProjection implements ProjectionInterface, PrefixableProjectionInterface {
 		public function __construct(
 			protected ProjectionInterface $projection,
 			protected string $prefix,
@@ -34,6 +34,10 @@
 				$prefix = $this->prefix;
 
 			return $this->projection->filter($data, $prefix);
+		}
+
+		public function withPrefix(string $prefix): ProjectionInterface {
+			return new static($this->projection, $this->addPrefix($prefix));
 		}
 
 		protected function addPrefix(string $path): string {
