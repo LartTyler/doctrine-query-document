@@ -271,6 +271,29 @@ purposes.
     echo QueryResult::describe($projection->query('foo')); // "deny"
 ```
 
+A potential "gotcha" when working with projections relates to how the system determines what should and should not be
+considered "explicit" versus "implicit" when querying a field. Consider the following projection and query.
+
+```php
+$projection = new Projection([
+    'foo' => [
+        '*' => false,
+        'bar' => true,
+    ]
+]);
+
+echo QueryResult::describe($projection->query('foo.bar')); // "explicit allow"
+echo QueryResult::describe($projection->query('foo.baz')); // "explicit deny"
+
+// Makes sense so far. But what about querying the parent node?
+echo QueryResult::describe($projection->query('foo')); // "explicit allow"
+```
+
+While `foo` isn't given an allow or deny modifier (has a value of `true` or `false`), it _does_ show up as a member of
+our projection, and should be given the "explicit" flag. Additionally, in order to make queries against child nodes, it
+is assumed to be "allowed," as it wouldn't make sense for a query to mark `foo` as denied but still mark `foo.bar` as
+allowed: how can a child be allowed when its parent wasn't?
+
 # Custom Operators
 You can add custom operator classes by implementing `DaybreakStudios\DoctrineQueryDocument\OperatorInterface`, or by
 extending `DaybreakStudios\DoctrineQueryDocument\Operators\AbstractOperator`.

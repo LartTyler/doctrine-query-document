@@ -103,8 +103,11 @@
 			// $current is still an array. If it isn't an array, then we should fall back on the default match behavior
 			// for the projection.
 			if (QueryResult::isEmpty($result)) {
+				// If we still had elements to check in the current path, we're querying a node that DOES have
+				// descendents still in the list. We need to mark it as explicitly allowed so that children can still
+				// be checked.
 				if (is_array($current))
-					$result = QueryResult::allow();
+					$result = QueryResult::allow(true);
 				else
 					$result = $this->getDefaultResult();
 			}

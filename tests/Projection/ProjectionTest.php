@@ -63,6 +63,48 @@
 				$result,
 				'explict denys on parent nodes are inherited by child nodes',
 			);
+
+			// Reverse-inheritance of explicit status
+			$projection = Projection::fromFields(
+				[
+					'a.b.c' => true,
+				],
+			);
+
+			$this->assertEquals(
+				QueryResult::allow(true),
+				$projection->query('a.b'),
+				'explicit allows on child nodes are passed up to parent node',
+			);
+
+			$this->assertEquals(
+				QueryResult::allow(true),
+				$projection->query('a'),
+				'explicit allows on child nodes are passed up to all ancestors',
+			);
+
+			// NOTE Unlike with allows, denies cannot be passed up to ancestors. If a node is explicitly denied further
+			//      down the line, ancestors MUST be marked as allowed, otherwise a denial could prevent all descendents
+			//      from being marked as allowed.
+			$projection = Projection::fromFields(['a.b.c' => false]);
+
+			$this->assertEquals(
+				QueryResult::allow(true),
+				$projection->query('a.b'),
+				'explicit denies are NOT passed up to parents',
+			);
+
+			$this->assertEquals(
+				QueryResult::allow(true),
+				$projection->query('a'),
+				'explicit denies are NOT passed up to all ancestors',
+			);
+
+			$projection = Projection::fromFields(['a.b.*' => false, 'a.b.c' => true]);
+
+			$this->assertEquals(QueryResult::allow(true), $projection->query('a.b'));
+			$this->assertEquals(QueryResult::deny(true), $projection->query('a.b.foo'));
+			$this->assertEquals(QueryResult::allow(true), $projection->query('a.b.c'));
 		}
 
 		public function testIsAllowedByDefault() {
@@ -128,6 +170,23 @@
 			);
 
 			$this->assertFalse($projection->isDeniedExplicitly('1.2.3'), 'does not match implicit deny');
+
+			$projection = Projection::fromFields(
+				[
+					'a' => false,
+				],
+			);
+
+			$this->assertTrue($projection->isDeniedExplicitly('a.b'), 'child nodes inherit parent explict deny');
+
+			$projection = Projection::fromFields(
+				[
+					'a.b' => false,
+				],
+			);
+
+			$this->assertFalse($projection->isDenied('a'), 'ancestors are assumed allowed');
+			$this->assertTrue($projection->isDeniedExplicitly('a.b'), 'child node matches explicitly');
 		}
 
 		public function testIsAllowed() {
@@ -217,8 +276,7 @@
 				false,
 			);
 
-			$this->assertTrue($projection->isAllowed('child'));
-			$this->assertFalse($projection->isAllowedExplicitly('child'));
+			$this->assertTrue($projection->isAllowedExplicitly('child'));
 			$this->assertTrue($projection->isAllowedExplicitly('child.field'));
 			$this->assertFalse($projection->isAllowed('child.bar'));
 
@@ -232,6 +290,23 @@
 			$this->assertTrue($projection->isAllowedExplicitly('child'));
 			$this->assertTrue($projection->isAllowedExplicitly('child.field'));
 			$this->assertFalse($projection->isAllowed('bar'));
+
+			$projection = Projection::fromFields(
+				[
+					'child.field' => false,
+					'other.*' => false,
+					'other.bar' => true,
+				],
+				true,
+			);
+
+			$this->assertTrue($projection->isAllowed('child'));
+			$this->assertTrue($projection->isDeniedExplicitly('child.field'));
+			$this->assertTrue($projection->isAllowed('child.bar'));
+
+			$this->assertTrue($projection->isAllowedExplicitly('other'));
+			$this->assertTrue($projection->isAllowedExplicitly('other.bar'));
+			$this->assertTrue($projection->isDeniedExplicitly('other.foo'));
 		}
 
 		public function testMatchAllFallback() {
@@ -240,7 +315,7 @@
 					'child.*' => false,
 					'child.foo' => true,
 				],
-				true
+				true,
 			);
 
 			$this->assertFalse($projection->isAllowed('child.bar'));
