@@ -90,6 +90,11 @@
 		}
 
 		public function apply(QueryBuilder $qb, array $query): void {
+			// If the query document is empty, we can just skip processing. Otherwise, we'll end up with an empty WHERE
+			// clause inserted into the query builder, which will break things.
+			if (count($query) === 0)
+				return;
+
 			$this->create($qb)->process($query);
 		}
 	}
