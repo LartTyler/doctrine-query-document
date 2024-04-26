@@ -205,6 +205,17 @@
 			);
 
 			$this->assertTrue($projection->isAllowed('1.2.3'), 'matches implicit allow');
+
+			$projection = Projection::fromFields(
+				[
+					'a.b' => true,
+				],
+				true,
+			);
+
+			$this->assertTrue($projection->isAllowedExplicitly('a.b'));
+			$this->assertTrue($projection->isAllowed('a.c'));
+			$this->assertFalse($projection->isAllowedExplicitly('a.c'));
 		}
 
 		public function testIsAllowedExplicitly() {
