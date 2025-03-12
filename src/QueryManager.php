@@ -31,6 +31,8 @@
 		 */
 		protected array $operators;
 
+		protected ?string $discriminatorResolverFunction;
+
 		public function __construct(
 			protected ObjectManager $objectManager,
 			array $operators = [],
@@ -45,6 +47,17 @@
 			}
 		}
 
+		public function getDiscriminatorResolverFunctionName(): ?string {
+			return $this->discriminatorResolverFunction;
+		}
+
+		public function setDiscriminatorResolverFunctionName(?string $name): void {
+			$this->discriminatorResolverFunction = $name;
+		}
+
+		/**
+		 * {@inheritdoc}
+		 */
 		public function getOperators(): array {
 			return $this->operators;
 		}
@@ -84,7 +97,12 @@
 
 		public function create(QueryBuilder $qb): QueryDocumentInterface {
 			$document = new QueryDocument($this, $this->objectManager, $qb);
-			$document->getResolver()->setAllMappedFields($this->mappedFields);
+
+			$resolver = $document->getResolver();
+			$resolver->setAllMappedFields($this->mappedFields);
+
+			if ($this->discriminatorResolverFunction && $resolver instanceof DiscriminatorAwareResolverInterface)
+				$resolver->setDiscriminatorResolverFunction($this->discriminatorResolverFunction);
 
 			return $document;
 		}

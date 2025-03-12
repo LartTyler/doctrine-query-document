@@ -3,11 +3,12 @@
 
 	use DaybreakStudios\DoctrineQueryDocument\Exception\UnknownFieldException;
 	use Doctrine\DBAL\Types\Types;
+	use Doctrine\ORM\Mapping\ClassMetadataInfo;
 	use Doctrine\ORM\QueryBuilder;
 	use Doctrine\Persistence\Mapping\ClassMetadata;
 	use Doctrine\Persistence\ObjectManager;
 
-	class Resolver implements ResolverInterface {
+	class Resolver implements ResolverInterface, DiscriminatorAwareResolverInterface {
 		use MappedFieldsTrait;
 
 		protected ClassMetadata $rootMetadata;
@@ -24,6 +25,8 @@
 		 * @var ClassMetadata[]
 		 */
 		protected array $loadedMetadata = [];
+
+		protected ?string $discriminatorResolverFn = null;
 
 		/**
 		 * Resolver constructor.
@@ -42,6 +45,10 @@
 
 			foreach ($mappedFields as $class => $fields)
 				$this->setMappedFields($class, $fields);
+		}
+
+		public function setDiscriminatorResolverFunction(?string $name): void {
+			$this->discriminatorResolverFn = $name;
 		}
 
 		public function resolve(string $field, array $context = []): string {
@@ -90,6 +97,8 @@
 					return sprintf("JSON_UNQUOTE(JSON_EXTRACT(%s.%s, '\$.%s'))", $alias, $part, $jsonKey);
 				} else if ($metadata->hasField($part))
 					break;
+				else if ($this->discriminatorResolverFn && $this->isDiscriminatorField($metadata, $part))
+					return sprintf('%s(%s)', $this->discriminatorResolverFn, $alias);
 				else if (!$metadata->hasAssociation($part))
 					throw new UnknownFieldException($field);
 
@@ -124,6 +133,13 @@
 			$resolved = $alias . '.' . $actualField;
 
 			return $this->resolveCache[$field] = $resolved;
+		}
+
+		public function isDiscriminatorField(ClassMetadata $metadata, string $name): bool {
+			if (!$metadata instanceof ClassMetadataInfo || !$metadata->discriminatorColumn)
+				return false;
+
+			return $metadata->discriminatorColumn['fieldName'] === $name;
 		}
 
 		public function getMetadata(string $alias): ?ClassMetadata {
