@@ -31,7 +31,7 @@
 		 */
 		protected array $operators;
 
-		protected ?string $discriminatorResolverFunction;
+		protected ?string $discriminatorResolverFunction = null;
 
 		public function __construct(
 			protected ObjectManager $objectManager,
